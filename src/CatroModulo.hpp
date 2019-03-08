@@ -51,14 +51,14 @@ struct CM_Knob_big_def : SVGKnob {
 
 struct CM_Pot1_small : SVGScrew {
 	CM_Pot1_small() {
-		sw->setSVG(SVG::load(assetPlugin(plugin, "res/CM-Pot1_small.svg")));
+		sw->setSVG(SVG::load(assetPlugin(plugin, "res/CM-pot1_small.svg")));
 		box.size = sw->box.size;
 	}
 };
 
 struct CM_Pot1_big : SVGScrew {
 	CM_Pot1_big() {
-		sw->setSVG(SVG::load(assetPlugin(plugin, "res/CM-Pot1_big.svg")));
+		sw->setSVG(SVG::load(assetPlugin(plugin, "res/CM-pot1_big.svg")));
 		box.size = sw->box.size;
         
 	}
