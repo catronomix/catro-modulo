@@ -1,13 +1,22 @@
 
-# VCV Template plugin
+# Catro/Modulo modules for VCV Rack
 
-The VCV Template plugin is a starting point for developing your own plugins for VCV Rack.
-It implements a simple sine VCO, demonstrating inputs, outputs, parameters, and other concepts.
+CM-1: 8x morphing phased LFO, + mix output and general reset.
 
-See https://vcvrack.com/manual/PluginDevelopmentTutorial.html for a development tutorial.
+CM-2: 8x attenuverters with offset + mix output.
 
-## Contributing
+CM1 and CM2 are working, but not yet finished.
 
-I welcome Issues and Pull Requests to this repository if you have suggestions for improvement.
+&nbsp;
 
-This template is released into the public domain ([CC0](https://creativecommons.org/publicdomain/zero/1.0/)).
+## TODO:
+
+-Add randomization triggers
+
+-Add rate range switch (CM-1)
+
+-Add boost switch (CM-2)
+
+&nbsp;
+
+(Manual for all modules will appear here in the future.)
