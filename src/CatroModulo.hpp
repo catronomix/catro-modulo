@@ -86,3 +86,10 @@ struct CM_Output_small : SVGPort {
         shadow->opacity = 0;
 	}
 };
+
+struct CM_Switch_small : SVGSwitch, ToggleSwitch {
+	CM_Switch_small() {
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_0.svg")));
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_1.svg")));
+	}
+};

@@ -1,13 +1,14 @@
 #include "CatroModulo.hpp"
 #include "dsp/digital.hpp"
+#include "dsp/minblep.hpp"
 
 struct LowFrequencyOscillator {
+	
 	float phase = 0.0f;
 	float pshift = 0.0f;
 	float typemix = 0.0f;
 	float pw = 0.5f;
 	float freq = 1.0f;
-	bool offset = false;
 	bool invert = false;
 	SchmittTrigger resetTrigger;
 
@@ -32,7 +33,7 @@ struct LowFrequencyOscillator {
 		}
 	}
 	void step(float dt) {
-			float deltaPhase = fminf(freq * dt, 0.5f);
+		float deltaPhase = fminf(freq * dt, 0.5f);
 		phase += deltaPhase;
 		if (phase >= 1.0f)
 			phase -= 1.0f;
@@ -42,33 +43,26 @@ struct LowFrequencyOscillator {
 			pshift -= 1.0f;	
 		}		
 	}
+
 	float sin() {
-		if (offset)
-			return 1.0f - cosf(2*M_PI * pshift) * (invert ? -1.0f : 1.0f);
-		else
 			return sinf(2*M_PI * pshift) * (invert ? -1.0f : 1.0f);
 	}
+
 	float tri(float x) {
 		return 4.0f * fabsf(x - roundf(x));
 	}
 	float tri() {
-		if (offset)
-			return tri(invert ? pshift - 0.5f : pshift);
-		else
 			return -1.0f + tri(invert ? pshift - 0.25f : pshift - 0.75f);
 	}
 	float saw(float x) {
 		return 2.0f * (x - roundf(x));
 	}
 	float saw() {
-		if (offset)
-			return invert ? 2.0f * (1.0f - pshift) : 2.0f * pshift;
-		else
 			return saw(pshift) * (invert ? -1.0f : 1.0f);
 	}
 	float sqr() {
 		float sqr = (pshift < pw) ^ invert ? 1.0f : -1.0f;
-		return offset ? sqr + 1.0f : sqr;
+		return sqr;
 	}
 
 	//mixing the types
@@ -96,7 +90,7 @@ struct LowFrequencyOscillator {
 
 struct CM1Module : Module {
 	enum ParamIds {
-		NUM_PARAMS = 32
+		NUM_PARAMS = 33
 	};
 	enum InputIds {
 		NUM_INPUTS = 33
@@ -122,14 +116,11 @@ struct CM1Module : Module {
 
 void CM1Module::step() {
 	float mixOut = 0.0f;
-
-		//TODO
-		//lfo[i].setShift();
-		//lfo[i].offset = (params[OFFSET_PARAM].value > 0.0f);
-		//lfo[i].invert = (params[INVERT_PARAM].value <= 0.0f);
+	float offset = 5.0f * params[32].value;
+	float reset = inputs[32].value;
 
 	for (int i = 0; i < 8; i++) {
-
+		if (outputs[i].active == true){
 		//merge modulations
 		float mod_one = clamp((inputs[i].active) ? params[i].value * inputs[i].value * 0.1f : params[i].value, 0.0f, 3.0f); //TYPE
 		float mod_two = clamp((inputs[i+8].active) ? params[i+8].value * inputs[i+8].value * 0.1f : params[i+8].value, -8.0f, 10.0f); //RATE
@@ -145,18 +136,19 @@ void CM1Module::step() {
 
 		//run lfo
 		lfo[i].step(engineGetSampleTime());
-		lfo[i].setReset(inputs[32].value);
+		lfo[i].setReset(reset);
 
 		//render output
-		float out = 5.0f * lfo[i].tmix();
+		float out = 5.0f * lfo[i].tmix() + offset;
 		outputs[i].value = clamp(out, -10.0f, 10.0f) ;
 		mixOut += out;
 
 		//output lights
 		lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.2f));
 		lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.2f));
-
-
+		}else{
+			outputs[i].value = 0;
+		}
 	}
 	//mixed output
 	outputs[8].value = mixOut * 0.125f;
@@ -261,10 +253,14 @@ struct CM1ModuleWidget : ModuleWidget {
 		}
 
 		//RESET
-		addInput(Port::create<CM_Input_def>(Vec(32.2, 339.2), Port::INPUT, module, 32));
+		addInput(Port::create<CM_Input_def>(Vec(17.4, 339.2), Port::INPUT, module, 32));
 
+		//OFFSET
+		addParam(ParamWidget::create<CM_Switch_small>(Vec(58.3, 338.7), module, 32, 0.0f, 1.0f, 0.0f));
+
+		//
 		//MIXOUT
-		addOutput(Port::create<CM_Output_small>(Vec(188.0, 344.1), Port::OUTPUT, module, 8));
+		addOutput(Port::create<CM_Output_small>(Vec(188.0, 342.5), Port::OUTPUT, module, 8));
 
 
 	}
