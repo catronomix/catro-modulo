@@ -1,6 +1,8 @@
 #include "CatroModulo.hpp"
 
+//Catro-Module 8xatn
 //parts of code copied from VCV's 8VERT module from the Fundamental pack by Andew Belt.
+
 
 struct CM2Module : Module {
 	enum ParamIds {
@@ -25,26 +27,55 @@ struct CM2Module : Module {
 	// - onReset, onRandomize, onCreate, onDelete: implements special behavior when user clicks these from the context menu
 };
 
+// void CM2Module::step() {
+// 	float mixOut = 0.0f;
+// 	int numconnect = 0;
+
+// 	for (int i = 0; i < 8; i++) {
+// 		numconnect += (inputs[i].active) ? 1 : 0;
+// 		int j = i + 8;
+// 		float out = clamp(inputs[i].value * params[i].value + params[j].value * 5.0f, -10.0f, 10.0f);
+// 		outputs[i].value = out;
+// 		if (inputs[i].active == true) {
+// 			mixOut += out;
+// 		}
+		
+// 		lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.2f));
+// 		lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.2f));
+// 	}
+// 	if (numconnect > 0) {
+// 		outputs[8].value = mixOut / numconnect;
+// 	}else{
+// 		outputs[8].value = 0.0f;
+// 	}
+// }
+
 void CM2Module::step() {
 	float mixOut = 0.0f;
 	int numconnect = 0;
 
 	for (int i = 0; i < 8; i++) {
 		numconnect += (inputs[i].active) ? 1 : 0;
-		int j = i + 8;
-		float out = clamp(inputs[i].value * params[i].value + params[j].value * 5.0f, -10.0f, 10.0f);
-		outputs[i].value = out;
-		if (inputs[i].active == true) {
-			mixOut += out;
+		float out = 0.0f;
+
+		if (inputs[i].active == true || outputs[i].active == true) {
+			int j = i + 8;
+			if (inputs[i].active == true) {
+				out = clamp(inputs[i].value * params[i].value + params[j].value * 5.0f, -10.0f, 10.0f);
+				mixOut += out;
+			} else {
+				out = clamp(params[i].value + params[j].value * 5.0f, -10.0f, 10.0f);
+			}
+			outputs[i].value = out;
+			
+			lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.2f));
+			lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.2f));
 		}
-		
-		lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.2f));
-		lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.2f));
-	}
-	if (numconnect > 0) {
-		outputs[8].value = mixOut / numconnect;
-	}else{
-		outputs[8].value = 0.0f;
+		if (numconnect > 0) {
+			outputs[8].value = mixOut / numconnect;
+		}else{
+			outputs[8].value = 0.0f;
+		}
 	}
 }
 

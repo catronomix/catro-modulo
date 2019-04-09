@@ -49,6 +49,35 @@ struct CM_Knob_big_def : SVGKnob {
 	}
 };
 
+struct CM_Knob_big_red : SVGKnob {
+	CM_Knob_big_red() {
+		minAngle = -1.0*M_PI;
+		maxAngle = 1.0*M_PI;
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_big_red.svg")));
+        shadow->opacity = 0;
+	}
+};
+
+struct CM_Knob_huge_red : SVGKnob {
+	CM_Knob_huge_red() {
+		minAngle = -1.0*M_PI;
+		maxAngle = 1.0*M_PI;
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_huge_red.svg")));
+        shadow->opacity = 0;
+	}
+};
+
+struct CM_Knob_bigeye : SVGKnob {
+	CM_Knob_bigeye() {
+		minAngle = -1.0*M_PI;
+		maxAngle = 1.0*M_PI;
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM_knob_bigeye.svg")));
+        shadow->opacity = 0;
+	}
+};
+
+
+
 struct CM_Pot1_small : SVGScrew {
 	CM_Pot1_small() {
 		sw->setSVG(SVG::load(assetPlugin(plugin, "res/CM-pot1_small.svg")));
@@ -71,6 +100,12 @@ struct CM_Input_def : SVGPort {
 	}
 };
 
+struct CM_Input_small : SVGPort {
+	CM_Input_small() {
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-input_small.svg")));
+        shadow->opacity = 0;
+	}
+};
 
 
 struct CM_Output_def : SVGPort {
