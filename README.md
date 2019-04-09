@@ -4,7 +4,8 @@
 CM-1: 8x morphing phased LFO, + mix output and general reset.
 
 CM-2: 8x attenuverters with offset + mix output.
-![ScreenShot](https://drive.google.com/file/d/1wY1tOztvckgqRQ4QcziW2ykS9Xue3pw4/preview)
+
+![screenshot](https://lh3.googleusercontent.com/dc_ptuhNTfjsbiHXxWRWJxJ8-RgaXKq_iiYxdE-0yls-b3ig0SS00hiKOMCGNa_aYBK6KCw_KK7jqA=w1920-h969)
 
 &nbsp;
 
