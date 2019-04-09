@@ -4,8 +4,7 @@
 CM-1: 8x morphing phased LFO, + mix output and general reset.
 
 CM-2: 8x attenuverters with offset + mix output.
-
-CM1 and CM2 are working, but not yet finished.
+![ScreenShot](https://drive.google.com/file/d/1wY1tOztvckgqRQ4QcziW2ykS9Xue3pw4/preview)
 
 &nbsp;
 
@@ -15,7 +14,7 @@ CM1 and CM2 are working, but not yet finished.
 
 -Add rate range switch (CM-1)
 
--Add boost switch (CM-2)
+-Code CM-3
 
 &nbsp;
 
