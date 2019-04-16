@@ -5,7 +5,9 @@ CM-1: 8x morphing phased LFO, + mix output and general reset.
 
 CM-2: 8x attenuverters with offset + mix output.
 
-![screenshot](https://lh3.googleusercontent.com/dc_ptuhNTfjsbiHXxWRWJxJ8-RgaXKq_iiYxdE-0yls-b3ig0SS00hiKOMCGNa_aYBK6KCw_KK7jqA=w1920-h969)
+CM-3: Preset sequencer and morpher 
+
+![screenshot](https://github.com/catronomix/catro-modulo/blob/master/CMmodules.png?raw=true)
 
 &nbsp;
 
@@ -13,9 +15,7 @@ CM-2: 8x attenuverters with offset + mix output.
 
 -Add randomization triggers
 
--Add rate range switch (CM-1)
-
--Code CM-3
+-CM-3: implement toJson/fromJson, add patterns, create feedback outputs
 
 &nbsp;
 
