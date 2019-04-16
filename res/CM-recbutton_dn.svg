@@ -9,13 +9,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="15.215678mm"
-   height="15.215678mm"
-   viewBox="0 0 15.215678 15.215678"
+   width="11.138855mm"
+   height="11.138855mm"
+   viewBox="0 0 11.138855 11.138855"
    version="1.1"
    id="svg9728"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="CM-knob_bigeye.svg">
+   sodipodi:docname="CM-recbutton_dn.svg">
   <defs
      id="defs9722" />
   <sodipodi:namedview
@@ -25,21 +25,21 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="6.5875311"
-     inkscape:cx="22.930914"
-     inkscape:cy="47.589295"
+     inkscape:zoom="7.5756608"
+     inkscape:cx="5.7067394"
+     inkscape:cy="20.921487"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer2"
+     inkscape:current-layer="g6802"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="923"
-     inkscape:window-height="1008"
-     inkscape:window-x="849"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
      units="mm"
      inkscape:showpageshadow="false" />
   <metadata
@@ -59,34 +59,35 @@
      id="layer2"
      inkscape:label="Layer 2"
      style="display:inline"
-     transform="translate(-3.9300998,6.4663755)">
+     transform="translate(-5.9685114,4.4279639)">
     <g
-       id="g4724">
+       transform="translate(9.9618331,-1.8012208)"
+       id="g6802">
       <circle
-         r="7.0858393"
-         cy="1.1414638"
-         cx="11.537939"
-         id="path4715"
-         style="opacity:1;fill:#2e2e2e;fill-opacity:1;stroke:#607f6c;stroke-width:1.04400003;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
+         r="5.5694275"
+         cy="2.9426844"
+         cx="1.5761058"
+         id="circle5623"
+         style="display:inline;opacity:1;fill:#759783;fill-opacity:1;stroke:none;stroke-width:0.74054492;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke;enable-background:new" />
       <circle
-         style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.00820339;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-         id="circle4717"
-         cx="11.537939"
-         cy="1.1414638"
-         r="6.8428793" />
+         style="display:inline;opacity:1;fill:#b3c8bd;fill-opacity:1;stroke:none;stroke-width:0.53583032;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke;enable-background:new"
+         id="circle5625"
+         cx="1.5761058"
+         cy="2.9426844"
+         r="4.0298276" />
       <circle
-         r="2.2777464"
-         cy="-2.9524579"
-         cx="11.537939"
-         id="path4719"
-         style="opacity:1;fill:#171717;fill-opacity:1;stroke:none;stroke-width:1.04400003;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
+         r="1.1616834"
+         cy="2.9426842"
+         cx="1.5761061"
+         id="path3632"
+         style="opacity:1;fill:#c63434;fill-opacity:1;stroke:none;stroke-width:0.06215663;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke" />
     </g>
   </g>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-214.77552,-106.88893)"
+     transform="translate(-216.81393,-108.92734)"
      style="display:none">
     <g
        id="g1815">

@@ -30,7 +30,7 @@ struct LowFrequencyOscillator {
 		typemix = sm;
 	}
 	void setReset(float reset) {
-		if (resetTrigger.process(reset / 0.01f)) {
+		if (resetTrigger.process(reset * 100)) {
 			phase = 0.0f;
 		}
 	}
@@ -83,9 +83,9 @@ struct LowFrequencyOscillator {
 		return tmr;
 	}
 
-	float light() {
-		return sinf(2*M_PI * pshift);
-	}
+	// float light() {
+	// 	return sinf(2*M_PI * pshift);
+	// }
 };
 
 
@@ -118,8 +118,8 @@ struct CM1Module : Module {
 
 void CM1Module::step() {
 	float mixOut = 0.0f;
-	float offset = 5.0f * params[32].value;
-	float reset = inputs[32].value;
+	float offset = 5.0f * params[33].value;
+	float reset = (inputs[32].value || params[32].value);
 
 	for (int i = 0; i < 8; i++) {
 		if (outputs[i].active == true){
@@ -167,8 +167,8 @@ struct CM1ModuleWidget : ModuleWidget {
 		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		//GRID
-		static float gridrowjacks[8] = {35.5, 74.3, 113.1, 151.9, 190.7, 229.5, 268.2, 307};
-		static float gridcoljacks[10] = {3.7, 29.9, 64.8, 94.1, 126.0, 155.1, 186.4, 215.8, 249.2, 279.3};
+		const float gridrowjacks[8] = {35.5, 74.3, 113.1, 151.9, 190.7, 229.5, 268.2, 307};
+		const float gridcoljacks[10] = {3.7, 29.9, 64.8, 94.1, 126.0, 155.1, 186.4, 215.8, 249.2, 279.3};
 		
 		//COL 1 IN TYPE
 		int i = -1;
@@ -255,8 +255,9 @@ struct CM1ModuleWidget : ModuleWidget {
 		}
 
 		//RESET
+		addParam(ParamWidget::create<CM_I_def_tinybuttonL>(Vec(8.5, 339.2), module, 32, 0.0f, 1.0f, 0.0f));
 		addInput(Port::create<CM_Input_def>(Vec(17.4, 339.2), Port::INPUT, module, 32));
-
+		
 		//OFFSET (+5V)
 		addParam(ParamWidget::create<CM_Switch_small>(Vec(58.3, 338.7), module, 32, 0.0f, 1.0f, 0.0f));
 

@@ -27,29 +27,6 @@ struct CM2Module : Module {
 	// - onReset, onRandomize, onCreate, onDelete: implements special behavior when user clicks these from the context menu
 };
 
-// void CM2Module::step() {
-// 	float mixOut = 0.0f;
-// 	int numconnect = 0;
-
-// 	for (int i = 0; i < 8; i++) {
-// 		numconnect += (inputs[i].active) ? 1 : 0;
-// 		int j = i + 8;
-// 		float out = clamp(inputs[i].value * params[i].value + params[j].value * 5.0f, -10.0f, 10.0f);
-// 		outputs[i].value = out;
-// 		if (inputs[i].active == true) {
-// 			mixOut += out;
-// 		}
-		
-// 		lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.2f));
-// 		lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.2f));
-// 	}
-// 	if (numconnect > 0) {
-// 		outputs[8].value = mixOut / numconnect;
-// 	}else{
-// 		outputs[8].value = 0.0f;
-// 	}
-// }
-
 void CM2Module::step() {
 	float mixOut = 0.0f;
 	int numconnect = 0;
@@ -88,7 +65,7 @@ struct CM2ModuleWidget : ModuleWidget {
 	addChild(Widget::create<ScrewSilver>(Vec(15, 365)));
 	addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 30, 365)));
 	//grid
-	static float gridrowjacks[8] = {35.5, 74.3, 113.1, 151.9, 190.7, 229.5, 268.2, 307};
+	const float gridrowjacks[8] = {35.5, 74.3, 113.1, 151.9, 190.7, 229.5, 268.2, 307};
 
 	
 	//LEFT ROW POTS
