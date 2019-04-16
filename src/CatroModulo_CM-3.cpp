@@ -22,6 +22,7 @@ const int INPUT_LENGTH = 20;
 const int INPUT_SELECT = 21;
 SchmittTrigger recordTrigger[16];
 float iselect = 0.0f;	
+float recsel = 0.0f;
 
 //SELECT sequencer
 struct CM_SelSeq {
@@ -29,36 +30,38 @@ struct CM_SelSeq {
 	SchmittTrigger stepTrigger;
 	SchmittTrigger resetTrigger;
 	int patterns[16][16] = {};
-
+	bool dostep = true;
+	
 	public:
 	int astep = 0;
 	bool patternized = false;
 
+
 	CM_SelSeq(){} 
 
 	//sequencer built-in patterns
-	//TODO: find out how to 2D this in one step so iteration can be used.
  	void patternize(){
 
-		int pat0[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat1[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat2[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat3[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
+		int pat0[16] =  {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
+		int pat1[16] =  {0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1};
+		int pat2[16] =  {0,-1,1,-1,2,-1,3,-1,4,-1,5,-1,6,-1,7,-1};
+		int pat3[16] =  {0,-1,7,-1,6,-1,5,-1,4,-1,3,-1,2,-1,1,-1};
+ 
+		int pat4[16] =  {0,2,6,4,1,3,7,5,0,2,6,4,1,3,7,5};
+		int pat5[16] =  {0,2,4,6,1,3,5,7,0,2,4,6,1,3,5,7};
+		int pat6[16] =  {0,2,1,3,2,4,3,5,4,6,5,7,6,0,7,1};
+		int pat7[16] =  {0,3,1,4,2,5,3,6,4,7,5,0,6,1,7,2};
+ 
+		int pat8[16] =  {0,1,2,3,4,5,6,7,7,6,5,4,3,2,1,0};
+		int pat9[16] =  {0,1,2,3,4,3,2,1,0,1,2,3,4,3,2,1};
+		int pat10[16] = {0,1,2,3,2,1,0,1,2,3,2,1,0,1,2,3};
+		int pat11[16] = {0,4,1,5,2,6,3,7,4,0,5,1,6,2,7,3};
 
-		int pat4[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat5[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat6[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat7[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
+		int pat12[16] = {0,1,2,3,1,2,3,4,2,3,4,5,3,4,5,6};
+		int pat13[16] = {0,1,2,1,2,3,2,3,4,3,4,5,4,5,6,5};
+		int pat14[16] = {7,5,6,4,5,3,4,2,1,3,2,4,3,5,4,6};
+		int pat15[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-		int pat8[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat9[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat10[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat11[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-
-		int pat12[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat13[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat14[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
-		int pat15[16] = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7};
 
 		for (int i = 0; i < 16; i++){
 		 patterns[0][i] = pat0[i];
@@ -114,18 +117,28 @@ struct CM_SelSeq {
 	void reset(float ireset){
 		if (resetTrigger.process(ireset)) {
 			astep = 0;
+			dostep = true;
 		}
 	}
 
 	void step(float istep, float len){
 		if (stepTrigger.process(istep)) {
 			if(astep < len && len <= 16){astep++;}else{astep = 0;}
+			dostep = true;
 		}
 	}
 
 	//Main sequencer function
 	float sequence(int pat){
-		return patterns[pat][astep];
+		if (dostep == true){
+			if (pat == 15){
+				recsel = rand() % 8;
+			}else{
+				recsel = patterns[pat][astep];
+			}
+			dostep = false;
+		}
+		return recsel;
 	}
 
 };
@@ -137,11 +150,26 @@ struct CM_Recorder {
 	float out[8] = {};
 	float lastselect = -1.0;
 	float lastscan = -1.0;
-	
+	SchmittTrigger randomTrigger;
+
 	CM_Recorder(){}
 
 	void reset(){
 		lastselect = -1.0;
+	}
+	
+	void randomize(){
+		srand(time(NULL));
+	}
+
+	//Save
+	float save(int i, int j){
+		return store[i][j];
+	}
+
+	//Load
+	void load(int i, int j, float val){
+		store[i][j] = val;
 	}
 
 	//store recording
@@ -152,7 +180,18 @@ struct CM_Recorder {
 		reset();
 	}
 
-
+	//randomize recordings
+	void tryme(float dotry){
+		if (randomTrigger.process(dotry)){
+			for (int i = 0; i < 8; i++){
+				for (int j = 0; j < 8; j++) {
+					rand(); rand(); //call random twice to get more random
+					store[i][j] = ((double) rand() / (RAND_MAX)); 
+				}
+			}
+			reset();
+		}
+	}
 
 	//selector scanning
 	void scan(float select, float scanner){
@@ -226,6 +265,34 @@ struct CM3Module : Module {
 	CM3Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {}
 	void step() override;
 
+
+	json_t *toJson() override {
+
+		json_t *rootJ = json_object();
+
+		json_t *recordsJ = json_array();
+		for (int i = 0; i < 8; i++){
+			for (int j = 0; j < 8; j++){
+				json_array_append_new(recordsJ, json_real(recorder.save(i,j)));
+			}
+		}
+		json_object_set_new(rootJ, "recorder", recordsJ);
+	
+		return rootJ;
+	}
+
+
+	void fromJson(json_t *rootJ) override {
+		// running
+		json_t *recorderJ = json_object_get(rootJ, "recorder");
+		for (int i = 0; i < 8; i++){
+			for (int j = 0; j < 8; j++){
+				recorder.load(i, j, json_real_value(json_array_get(recorderJ, 8 * i + j)));
+			}
+		}
+
+	}
+
 	// For more advanced Module features, read Rack's engine.hpp header file
 	// - toJson, fromJson: serialization of internal data
 	// - onSampleRateChange: event triggered by a change of sample rate
@@ -241,6 +308,10 @@ void CM3Module::step() {
 	float seq_step = (inputs[INPUT_STEP].value || params[PARAM_STEP].value);
 	float seq_pattern = roundf((inputs[INPUT_PATTERN].active) ? inputs[INPUT_PATTERN].value * 0.1f * params[PARAM_PATTERN].value : params[PARAM_PATTERN].value);
 	float seq_len = roundf((inputs[INPUT_LENGTH].active) ? inputs[INPUT_LENGTH].value * 0.1f * params[PARAM_LENGTH].value : params[PARAM_LENGTH].value);
+	float doscan = (params[PARAM_SCAN].value && params[PARAM_SEQ].value);
+
+	//process tryme button
+	recorder.tryme(params[PARAM_TRYME].value);
 
 	//process sequencer
 	if (seq_active == 1.0){
@@ -273,10 +344,14 @@ void CM3Module::step() {
 	if (seq_active == 0.0){
 		iselect = (inputs[INPUT_SELECT].active) ? inputs[INPUT_SELECT].value * 0.1f * params[PARAM_SELECT].value : params[PARAM_SELECT].value;
 	}
-	recorder.scan(iselect, params[PARAM_SCAN].value);
+	recorder.scan(iselect, doscan);
 	recorder.mix(eyeval,morph);
 	for (int i = 0; i < 8; i++) {
-		outputs[i].value = recorder.output(i);
+		if (recsel != -1.0){
+			outputs[i].value = recorder.output(i);
+		}else{
+			outputs[i].value = 0.0f;
+		}
 	}
 
 }
@@ -292,6 +367,7 @@ struct CM3ModuleWidget : ModuleWidget {
 
 		int y = 0; //initialize reusable counter
 		sequencer.patternize(); //initialize sequencer patterns
+		recorder.randomize(); //seed rng
 
 		//REC BUTTONS
 		float recbuttons[16] = {178.8 , 89.5 ,
@@ -337,7 +413,7 @@ struct CM3ModuleWidget : ModuleWidget {
 
 		for(int i = 0; i < 16; i += 2){
 			
-			addParam(ParamWidget::create<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, y + 8, -1.0f, 1.0f, 1.0f));
+			addParam(ParamWidget::create<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, y + 8, -1.0f, 1.0f, 0.0f));
 			//addChild(Widget::create<CM_Indicator_bigeye>(Vec(vbigeyes[i]-1,vbigeyes[i+1]-2))); //TODO: rotating indicator that shows output
 			y++;
 		}
@@ -379,7 +455,7 @@ struct CM3ModuleWidget : ModuleWidget {
 		addParam(ParamWidget::create<CM_TryMe_button>(Vec(17.0 , 322.1), module, PARAM_TRYME, 0.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Switch_small>(Vec(137.8 , 309.0), module, PARAM_SCAN, 0.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Knob_huge_red_os>(Vec(161.5 , 286.0), module, PARAM_SELECT, 0.0f, 7.99999f, 0.0f));
-		addParam(ParamWidget::create<CM_Knob_small_def>(Vec(232.2 , 304.5), module,PARAM_Q, 0.1f, 0.9f, 0.5f));
+		//addParam(ParamWidget::create<CM_Knob_small_def>(Vec(232.2 , 304.5), module,PARAM_Q, 0.1f, 0.9f, 0.5f)); //maybe implement later?
 		addParam(ParamWidget::create<CM_Switch_small>(Vec(366. , 309.0), module,  PARAM_SEQ, 0.0f, 1.0f, 1.0f));
 		addParam(ParamWidget::create<CM_I_def_tinybuttonR>(Vec(263.0 , 38.7), module, PARAM_RESET, 0.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_I_def_tinybuttonL>(Vec(107.0 , 38.7), module, PARAM_STEP, 0.0f, 1.0f, 0.0f));

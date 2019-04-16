@@ -173,8 +173,8 @@ struct CM_Recbutton : SVGSwitch, MomentarySwitch {
 
 struct CM_Slider_big_red : SVGSlider {
 	CM_Slider_big_red() {
-		minHandlePos = Vec(-8, 0);
-		maxHandlePos = Vec(57, 0);
+		minHandlePos = Vec(-4, 0);
+		maxHandlePos = Vec(58, 0);
 		setSVGs(SVG::load(assetPlugin(plugin, "res/CM-slider_big_red_bg.svg")), SVG::load(assetPlugin(plugin, "res/CM-slider_big_red.svg")));
 	}
 };

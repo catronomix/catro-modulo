@@ -259,7 +259,7 @@ struct CM1ModuleWidget : ModuleWidget {
 		addInput(Port::create<CM_Input_def>(Vec(17.4, 339.2), Port::INPUT, module, 32));
 		
 		//OFFSET (+5V)
-		addParam(ParamWidget::create<CM_Switch_small>(Vec(58.3, 338.7), module, 32, 0.0f, 1.0f, 0.0f));
+		addParam(ParamWidget::create<CM_Switch_small>(Vec(58.3, 338.7), module, 33, 0.0f, 1.0f, 0.0f));
 
 		//
 		//MIXOUT
