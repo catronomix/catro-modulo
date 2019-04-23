@@ -3,6 +3,8 @@
 ![screenshot1](https://github.com/catronomix/catro-modulo/blob/master/catromodulo_1.png?raw=true)
 ![screenshot2](https://github.com/catronomix/catro-modulo/blob/master/catromodulo_2.png?raw=true)
 
+Full manual here: https://github.com/catronomix/catro-modulo/blob/master/CM-manual-v0.6.4.pdf
+
 CM-1: 8xlfo <br>
 8 LFOs that blend between sine, square, saw and triangle waves
 Rate is from very slow to audio rate
