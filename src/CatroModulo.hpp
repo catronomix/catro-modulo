@@ -1,6 +1,5 @@
 #include "rack.hpp"
 #include "dsp/digital.hpp"
-
 using namespace rack;
 
 
@@ -11,6 +10,8 @@ extern Plugin *plugin;
 extern Model *modelCM1Module;
 extern Model *modelCM2Module;
 extern Model *modelCM3Module;
+extern Model *modelCM4Module;
+extern Model *modelCM5Module;
 
 struct CM_Knob_small_def : SVGKnob {
 	CM_Knob_small_def() {
@@ -136,6 +137,20 @@ struct CM_Input_small : SVGPort {
 	}
 };
 
+struct CM_I_small_tinybuttonL : SVGSwitch, MomentarySwitch {
+	CM_I_small_tinybuttonL() {
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_small_tinybuttonL.svg")));
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_small_tinybuttonL_dn.svg")));
+	}
+};
+
+struct CM_Input_bpm : SVGPort {
+	CM_Input_bpm() {
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-input_bpm.svg")));
+        shadow->opacity = 0;
+	}
+};
+
 
 struct CM_Output_def : SVGPort {
 	CM_Output_def() {
@@ -147,6 +162,13 @@ struct CM_Output_def : SVGPort {
 struct CM_Output_small : SVGPort {
 	CM_Output_small() {
 		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_small.svg")));
+        shadow->opacity = 0;
+	}
+};
+
+struct CM_Output_bpm : SVGPort {
+	CM_Output_bpm() {
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_bpm.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -172,6 +194,13 @@ struct CM_Recbutton : SVGSwitch, MomentarySwitch {
 	}
 };
 
+struct CM_Button_small_red : SVGSwitch, MomentarySwitch {
+	CM_Button_small_red() {
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-button_small_red.svg")));
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-button_small_red_dn.svg")));
+	}
+};
+
 struct CM_Slider_big_red : SVGSlider {
 	CM_Slider_big_red() {
 		minHandlePos = Vec(-4, 0);
@@ -180,6 +209,13 @@ struct CM_Slider_big_red : SVGSlider {
 	}
 };
 
+struct CM_Switch_small_3 : SVGSwitch, ToggleSwitch {
+	CM_Switch_small_3() {
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_0.svg")));
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_1.svg")));
+		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_2.svg")));
+	}
+};
 //classes
 
 //SELECT sequencer
@@ -188,13 +224,20 @@ struct CM_SelSeq {
 	SchmittTrigger stepTrigger;
 	SchmittTrigger resetTrigger;
 	int patterns[16][16] = {};
-	bool dostep = true;
-	float recsel = 0.0f;
+	bool dostep;
+	float recsel;
+	int astep;
 	
 	public:
-	int astep = 0;
-	bool patternized = false;
+	bool patternized;
 
+	CM_SelSeq(){
+		dostep = true;
+		recsel = 0.0f;
+		astep = 0;
+		patternized = false;
+		patternize();
+	}
 	//sequencer built-in patterns
  	void patternize(){
 
@@ -310,6 +353,11 @@ struct CM_Recorder {
 	SchmittTrigger randomTrigger;
 
 	public:
+
+	CM_Recorder(){
+		randomize();
+	}
+
 	void reset(){
 		lastselect = -1.0;
 	}
@@ -399,4 +447,149 @@ struct CM_Recorder {
 	float output(int index){
 		return out[index] * 10.0f;
 	}
+};
+
+//BPM system
+struct CM_BpmClock {
+	private:
+
+	float clk_bpm;
+	float bpm_cv;
+	float phase;
+	float pw;
+	float freq;
+	SchmittTrigger resetTrigger;
+	SchmittTrigger trackingTrigger[3];
+	float bpm_out[3] = {};
+	float clk_out[3] = {};
+
+	public:
+
+	CM_BpmClock(){
+		clk_bpm = 0.0f;
+		bpm_cv = 0.0f;
+		phase = 0.0f;
+		pw = 0.5f;
+		freq = 1.0f;
+	}
+
+	//between 0 and 1000
+	void setbpm(float bpm){
+		bpm = max(bpm, 0.0f);
+		clk_bpm = bpm;
+		bpm_cv = bpmtocv(bpm);
+		// freq = clk_bpm / 30.0; //double freq! -for halfstep
+	}	
+	void setcv(float cv){
+		setbpm(cvtobpm(cv));
+	}
+
+	float addcv(float cv){
+		clk_bpm += cvtobpm(cv);
+		bpm_cv += cv;
+		// freq = clk_bpm / 30.0; //double freq! -for halfstep
+		return bpm_cv;
+	}
+
+	float getcv(){
+		return bpm_cv;
+	}
+
+	float getbpm(){
+		return clk_bpm;
+	}
+
+	void step(float dt){
+		pulsegen();		
+		freq = clk_bpm / 30.0; //double freq! -for halfstep
+		float deltaPhase = fminf(freq * dt, 0.5f); //delta is halftime
+		phase += deltaPhase;
+		if (phase >= 1.0f){phase -= 1.0f;}
+				
+	}
+
+  	void setReset(float reset) {
+		if (resetTrigger.process(reset)) {
+			phase = 0.0f;
+			clk_out[0] = 1.0;
+			clk_out[1] = 1.0;
+			clk_out[2] = 1.0;
+			trackingTrigger[0].reset();
+			trackingTrigger[1].reset();
+			trackingTrigger[2].reset();
+		}
+	}
+
+	float track(int out){
+		return clk_out[out];
+	}
+
+	float bpmtocv(float bpm){
+		return bpm * 0.01;
+	}
+
+	float cvtobpm(float cv){
+		return cv * 100.0;
+	}
+
+	private:
+
+	float sqr(){
+		float sqr = phase < pw ? 1.0f : -1.0f;
+		return sqr;
+	}
+
+	void pulsegen(){
+		if (trackingTrigger[0].process(sqr())){
+			clk_out[0] = !(clk_out[0]);
+		}
+		if (trackingTrigger[1].process(clk_out[0])){
+			clk_out[1] = !(clk_out[1]);
+		}
+		if (trackingTrigger[2].process(clk_out[1])){
+			clk_out[2] = !(clk_out[2]);
+		}
+	}
+};
+
+//LCD display (from cf modules)
+struct NumDisplayWidget : TransparentWidget {
+
+  float *value;
+  std::shared_ptr<Font> font;
+
+  NumDisplayWidget() {
+    font = Font::load(assetPlugin(plugin, "res/Segment7Standard.ttf"));
+  };
+
+  void draw(NVGcontext *vg) override {
+    // Background
+    NVGcolor backgroundColor = nvgRGB(0x25, 0x2f, 0x24);
+    NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, 0.0, 0.0, box.size.x, box.size.y, 4.0);
+    nvgFillColor(vg, backgroundColor);
+    nvgFill(vg);
+    nvgStrokeWidth(vg, 1.0);
+    nvgStrokeColor(vg, borderColor);
+    nvgStroke(vg);
+
+    nvgFontSize(vg, 16);
+    nvgFontFaceId(vg, font->handle);
+    nvgTextLetterSpacing(vg, 2.2);
+
+    std::string to_display = std::to_string(*value).substr(0,5);
+	while(to_display.length()<5) to_display = ' ' + to_display;
+
+    Vec textPos = Vec(3.0f, 17.0f);
+
+    NVGcolor textColor = nvgRGB(0xff, 0xf4, 0x00);
+    nvgFillColor(vg, nvgTransRGBA(textColor, 16));
+    nvgText(vg, textPos.x, textPos.y, "~~~~~", NULL);
+    nvgText(vg, textPos.x, textPos.y, ".....", NULL);
+	nvgText(vg, textPos.x, textPos.y, "\\\\\\\\\\", NULL);
+
+    nvgFillColor(vg, textColor);
+    nvgText(vg, textPos.x, textPos.y, to_display.c_str(), NULL);
+  }
 };

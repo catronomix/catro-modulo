@@ -1,38 +1,42 @@
 #include "CatroModulo.hpp"
 
-
 //Catro-Module CM3: PreSetSeq
 
-//global constants 
-const int PARAM_PATTERN = 16;
-const int PARAM_MORPH = 17;
-const int PARAM_LENGTH = 18;
-const int PARAM_TRYME = 19;
-const int PARAM_SCAN = 20;
-const int PARAM_SELECT = 21;
-const int PARAM_Q = 22;
-const int PARAM_SEQ = 23;
-const int PARAM_RESET = 24;
-const int PARAM_STEP = 25;
-const int INPUT_PATTERN = 16;
-const int INPUT_STEP = 17;
-const int INPUT_MORPH = 18;
-const int INPUT_RESET = 19;
-const int INPUT_LENGTH = 20;
-const int INPUT_SELECT = 21;
-
 struct CM3Module : Module {
+
 	enum ParamIds {
-		NUM_PARAMS = 26
+		ENUMS(PARAM_REC, 8), 
+		ENUMS(PARAM_EYE, 8), 
+		PARAM_PATTERN,
+		PARAM_MORPH,
+		PARAM_LENGTH,
+		PARAM_TRYME,
+		PARAM_SCAN,
+		PARAM_SELECT,
+		PARAM_Q,
+		PARAM_SEQ,
+		PARAM_RESET,
+		PARAM_STEP,
+		NUM_PARAMS,
 	};
 	enum InputIds {
-		NUM_INPUTS = 22
+		ENUMS(INPUT_REC, 8), 
+		ENUMS(INPUT_EYE, 8), 
+		INPUT_PATTERN,
+		INPUT_STEP,
+		INPUT_MORPH,
+		INPUT_RESET,
+		INPUT_LENGTH,
+		INPUT_SELECT,
+		INPUT_BPM,
+		NUM_INPUTS
 	};
 	enum OutputIds {
-		NUM_OUTPUTS = 8
+		ENUMS(OUTPUT_EYE, 8), 
+		NUM_OUTPUTS
 	};
 	enum LightIds {
-		NUM_LIGHTS = 0
+		NUM_LIGHTS
 	};
 
 	//initializations
@@ -41,11 +45,10 @@ struct CM3Module : Module {
 	float recsel = 0.0f;
 	CM_SelSeq sequencer;
 	CM_Recorder recorder;
+	CM_BpmClock bpmclock;
 	
-	CM3Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
-			sequencer.patternize(); //initialize sequencer patterns
-			recorder.randomize(); //seed rng
-	}
+	CM3Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {}
+	
 	void step() override;
 
 
@@ -88,10 +91,24 @@ void CM3Module::step() {
 	float morph = (inputs[INPUT_MORPH].active) ? inputs[INPUT_MORPH].value * 0.1f + params[PARAM_MORPH].value : params[PARAM_MORPH].value;
 	float seq_active = 1.0 - params[PARAM_SEQ].value;
 	float seq_reset = (inputs[INPUT_RESET].value || params[PARAM_RESET].value);
-	float seq_step = (inputs[INPUT_STEP].value || params[PARAM_STEP].value);
 	float seq_pattern = roundf((inputs[INPUT_PATTERN].active) ? inputs[INPUT_PATTERN].value * 0.1f * params[PARAM_PATTERN].value : params[PARAM_PATTERN].value);
 	float seq_len = roundf((inputs[INPUT_LENGTH].active) ? inputs[INPUT_LENGTH].value * 0.1f * params[PARAM_LENGTH].value : params[PARAM_LENGTH].value);
 	float doscan = (params[PARAM_SCAN].value && params[PARAM_SEQ].value);
+
+	//check for bpm cv
+	float seq_step = 0;
+	if (inputs[INPUT_BPM].active){
+		bpmclock.setcv(inputs[INPUT_BPM].value);
+	}
+	
+	bpmclock.setReset(inputs[INPUT_RESET].value || params[PARAM_RESET].value);
+		
+	if (inputs[INPUT_BPM].active){
+		bpmclock.step(engineGetSampleTime());
+		seq_step = bpmclock.track(1);
+	}else{
+		seq_step = (inputs[INPUT_STEP].value || params[PARAM_STEP].value);
+	}
 
 	//process tryme button
 	recorder.tryme(params[PARAM_TRYME].value);
@@ -101,16 +118,16 @@ void CM3Module::step() {
 	float eyeval[8] = {};
 	for (int i = 0; i < 8; i++) {
 		float in = 1.0f;
-		float eye = params[i+8].value;
-		if (inputs[i+8].active){
-			in = inputs[i+8].value * 0.1f;
+		float eye = params[i+PARAM_EYE].value;
+		if (inputs[i+PARAM_EYE].active){
+			in = inputs[i+PARAM_EYE].value * 0.1f;
 		}
 		eyeval[i] = clamp(in * eye, -1.0f, 1.0f);
 	}
 
 	//record when requested
 		for (int i = 0; i < 8; i++) {
-			if (recordTrigger[i].process((inputs[i].value || params[i].value))){
+			if (recordTrigger[i].process((inputs[INPUT_REC+i].value || params[PARAM_REC+i].value))){
 				recorder.record(eyeval, i);
 			}
 		}
@@ -129,22 +146,23 @@ void CM3Module::step() {
 	recorder.mix(eyeval,morph);
 	for (int i = 0; i < 8; i++) {
 		if (iselect != -1.0){
-			outputs[i].value = recorder.output(i);
+			outputs[OUTPUT_EYE+i].value = recorder.output(i);
 		}else{
-			outputs[i].value = 0.0f;
+			outputs[OUTPUT_EYE+i].value = 0.0f;
 		}
 	}
 
 }
 
 struct CM3ModuleWidget : ModuleWidget {
+
 	CM3ModuleWidget(CM3Module *module) : ModuleWidget(module) {
 		setPanel(SVG::load(assetPlugin(plugin, "res/CM-3.svg")));
 
 		addChild(Widget::create<ScrewSilver>(Vec(30, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 60, 0)));
+		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 40, 0)));
 		addChild(Widget::create<ScrewSilver>(Vec(30, 365)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 60, 365)));
+		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 40, 365)));
 
 		int y = 0; //initialize reusable counter
 
@@ -228,25 +246,26 @@ struct CM3ModuleWidget : ModuleWidget {
 		}
 
 		//OTHER ELEMENTS
-		addParam(ParamWidget::create<CM_Knob_small_def>(Vec(33.4 , 34.7), module, PARAM_PATTERN, 0.0f, 15.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Slider_big_red>(Vec(156.5 , 17.9), module, PARAM_MORPH, -1.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Knob_small_def>(Vec(326.0 , 34.7), module, PARAM_LENGTH, 0.0f, 15.0f, 7.0f));
-		addParam(ParamWidget::create<CM_TryMe_button>(Vec(17.0 , 322.1), module, PARAM_TRYME, 0.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Switch_small>(Vec(137.8 , 309.0), module, PARAM_SCAN, 0.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Knob_huge_red_os>(Vec(161.5 , 286.0), module, PARAM_SELECT, 0.0f, 7.99999f, 0.0f));
+		addParam(ParamWidget::create<CM_Knob_small_def>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f));
+		addParam(ParamWidget::create<CM_Slider_big_red>(Vec(156.5 , 17.9), module, CM3Module::PARAM_MORPH, -1.0f, 1.0f, 0.0f));
+		addParam(ParamWidget::create<CM_Knob_small_def>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f));
+		addParam(ParamWidget::create<CM_TryMe_button>(Vec(17.0 , 322.1), module, CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f));
+		addParam(ParamWidget::create<CM_Switch_small>(Vec(137.8 , 309.0), module, CM3Module::PARAM_SCAN, 0.0f, 1.0f, 0.0f));
+		addParam(ParamWidget::create<CM_Knob_huge_red_os>(Vec(161.3 , 286.0), module, CM3Module::PARAM_SELECT, 0.0f, 7.99999f, 0.0f));
 		//addParam(ParamWidget::create<CM_Knob_small_def>(Vec(232.2 , 304.5), module,PARAM_Q, 0.1f, 0.9f, 0.5f)); //maybe implement later?
-		addParam(ParamWidget::create<CM_Switch_small>(Vec(366. , 309.0), module,  PARAM_SEQ, 0.0f, 1.0f, 1.0f));
-		addParam(ParamWidget::create<CM_I_def_tinybuttonR>(Vec(263.0 , 38.7), module, PARAM_RESET, 0.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_I_def_tinybuttonL>(Vec(107.0 , 38.7), module, PARAM_STEP, 0.0f, 1.0f, 0.0f));
+		addParam(ParamWidget::create<CM_Switch_small>(Vec(366. , 309.0), module, CM3Module::PARAM_SEQ, 0.0f, 1.0f, 1.0f));
+		addParam(ParamWidget::create<CM_I_def_tinybuttonR>(Vec(263.0 , 38.7), module, CM3Module::PARAM_RESET, 0.0f, 1.0f, 0.0f));
+		addParam(ParamWidget::create<CM_I_def_tinybuttonL>(Vec(85.4 , 38.7), module, CM3Module::PARAM_STEP, 0.0f, 1.0f, 0.0f));
 
 
 
-		addInput(Port::create<CM_Input_def>(Vec(15.7 , 60.1), Port::INPUT, module, INPUT_PATTERN));
-		addInput(Port::create<CM_Input_def>(Vec(116.2 , 38.7), Port::INPUT, module, INPUT_STEP));
-		addInput(Port::create<CM_Input_def>(Vec(183.5 , 45.4), Port::INPUT, module, INPUT_MORPH));
-		addInput(Port::create<CM_Input_def>(Vec(250.8 , 38.7), Port::INPUT, module, INPUT_RESET));
-		addInput(Port::create<CM_Input_def>(Vec(352.3 , 61.4), Port::INPUT, module, INPUT_LENGTH));
-		addInput(Port::create<CM_Input_def>(Vec(183.5 , 259.0), Port::INPUT, module, INPUT_SELECT));
+		addInput(Port::create<CM_Input_def>(Vec(15.7 , 60.1), Port::INPUT, module, CM3Module::INPUT_PATTERN));
+		addInput(Port::create<CM_Input_def>(Vec(94.0 , 38.7), Port::INPUT, module, CM3Module::INPUT_STEP));
+		addInput(Port::create<CM_Input_bpm>(Vec(128.2 , 38.7), Port::INPUT, module, CM3Module::INPUT_BPM));
+		addInput(Port::create<CM_Input_def>(Vec(183.5 , 45.4), Port::INPUT, module, CM3Module::INPUT_MORPH));
+		addInput(Port::create<CM_Input_def>(Vec(250.8 , 38.7), Port::INPUT, module, CM3Module::INPUT_RESET));
+		addInput(Port::create<CM_Input_def>(Vec(352.3 , 61.4), Port::INPUT, module, CM3Module::INPUT_LENGTH));
+		addInput(Port::create<CM_Input_def>(Vec(183.5 , 259.0), Port::INPUT, module, CM3Module::INPUT_SELECT));
 	}
 };
 
@@ -255,4 +274,4 @@ struct CM3ModuleWidget : ModuleWidget {
 // author name for categorization per plugin, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM3Module = Model::create<CM3Module, CM3ModuleWidget>("CatroModulo", "CatroModulo_CM-3", "CM-3", SEQUENCER_TAG);
+Model *modelCM3Module = Model::create<CM3Module, CM3ModuleWidget>("CatroModulo", "CatroModulo_CM-3", "C/M3 : PreSetSeq", SEQUENCER_TAG);
