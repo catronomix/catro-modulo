@@ -35,4 +35,3 @@ It is a blank panel and it is 1hp wide :)
 
 &nbsp;
 
-(Manual for all modules will appear in the future.)
