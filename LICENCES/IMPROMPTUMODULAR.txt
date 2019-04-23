@@ -1,4 +1,6 @@
-Copyright (c) 2019 Innocent Coppieters. All rights reserved.
+#### IMPROMPTU MODULAR ####
+
+Copyright (c) 2018 Marc Boulé. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

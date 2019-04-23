@@ -12,6 +12,7 @@ extern Model *modelCM2Module;
 extern Model *modelCM3Module;
 extern Model *modelCM4Module;
 extern Model *modelCM5Module;
+extern Model *modelCM6Module;
 
 struct CM_Knob_small_def : SVGKnob {
 	CM_Knob_small_def() {
