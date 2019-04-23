@@ -19,16 +19,19 @@ Morph slider fades between recording output, direct eye output and recordingXdir
 Sequencer with some built-in patterns and basic controls
 Don't press the "Try me"-button! ;)
 
+CM-4: vcClk
+Voltage controlled bpm clock
+The gold-plated in and outputs are for the bpm sync signal, for which standards are shared between all the other modules to enable synced bpm changes. Simply chain the bpm cv between the modules, and connect all reset inputs to the vcClk reset output
 
-![screenshot](https://github.com/catronomix/catro-modulo/blob/master/MC_screenshot_03.png?raw=true)
+CM-5: vcClk++
+Expansion for vcClk, it outputs 7 clock pulses that are synced with the input
 
-&nbsp;
+CM-6: 1hp blank
+It is a blank panel and it is 1hp wide :)
 
-## TODO:
 
--CM-1: add row copy down buttons
-
--CM-2: move patterns to external file so users can create their own patterns (maybe create a separate pattern maker module?)
+![screenshot1](https://github.com/catronomix/catro-modulo/blob/master/catromodulo_1.png?raw=true)
+![screenshot2](https://github.com/catronomix/catro-modulo/blob/master/catromodulo_2.png?raw=true)
 
 &nbsp;
 
