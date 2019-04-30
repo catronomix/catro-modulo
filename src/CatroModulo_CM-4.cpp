@@ -1,7 +1,7 @@
 #include "CatroModulo.hpp"
 
 
-//Catro-Module CM-4: BPM2CV
+//Catro-Module CM-4: vcClk
 
 struct CM4Module : Module {
 

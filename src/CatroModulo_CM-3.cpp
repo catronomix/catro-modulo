@@ -40,12 +40,23 @@ struct CM3Module : Module {
 	};
 
 	//initializations
+	std::string display_pat = "";
+	std::string display_len = "";
+	std::string strings_pat[16] = {"SEQ", "REV", "S0Q", "R0V", "NZN", "CUC", "ZZ1", "ZZ2", "U7D", "U4D", "U3D", ">-<", "/\\/", ".-.", "\\/\\", "RND"};
+	std::string strings_len[16] = {" 01", " 02", " 03", " 04", " 05", " 06", " 07", " 08", " 09", " 10", " 11", " 12", " 13", " 14", "15", "16"};
 	SchmittTrigger recordTrigger[16];
 	float iselect = 0.0f;	
 	float recsel = 0.0f;
+	float recball_x = 178.8;
+	float recball_y = 89.5;
+	float recball_xarray[8] = {178.8 , 212.4 , 242.7 , 212.4 , 178.8 , 145.3 , 115.0 , 145.3};
+	float recball_yarray[8] = {89.5 , 119.9 , 153.4 , 186.9 , 217.2 , 186.9 , 153.4 , 119.9 };
+	float eyepatch_val[8] = {};	
+
 	CM_SelSeq sequencer;
 	CM_Recorder recorder;
 	CM_BpmClock bpmclock;
+
 	
 	CM3Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {}
 	
@@ -87,12 +98,13 @@ struct CM3Module : Module {
 
 void CM3Module::step() {
 
+
 	//mix params and inputs
 	float morph = (inputs[INPUT_MORPH].active) ? inputs[INPUT_MORPH].value * 0.1f + params[PARAM_MORPH].value : params[PARAM_MORPH].value;
 	float seq_active = 1.0 - params[PARAM_SEQ].value;
 	float seq_reset = (inputs[INPUT_RESET].value || params[PARAM_RESET].value);
-	float seq_pattern = roundf((inputs[INPUT_PATTERN].active) ? inputs[INPUT_PATTERN].value * 0.1f * params[PARAM_PATTERN].value : params[PARAM_PATTERN].value);
-	float seq_len = roundf((inputs[INPUT_LENGTH].active) ? inputs[INPUT_LENGTH].value * 0.1f * params[PARAM_LENGTH].value : params[PARAM_LENGTH].value);
+	float seq_pattern = clamp(roundf((inputs[INPUT_PATTERN].active) ? inputs[INPUT_PATTERN].value * 0.1f * params[PARAM_PATTERN].value : params[PARAM_PATTERN].value), 0.0, 15.0);
+	float seq_len = clamp(roundf((inputs[INPUT_LENGTH].active) ? inputs[INPUT_LENGTH].value * 0.1f * params[PARAM_LENGTH].value : params[PARAM_LENGTH].value), 0.0, 15.0);
 	float doscan = (params[PARAM_SCAN].value && params[PARAM_SEQ].value);
 
 	//check for bpm cv
@@ -140,18 +152,34 @@ void CM3Module::step() {
 			iselect = sequencer.sequence(seq_pattern);
 		}
 	}else{
-		iselect = (inputs[INPUT_SELECT].active) ? inputs[INPUT_SELECT].value * 0.1f * params[PARAM_SELECT].value : params[PARAM_SELECT].value;
+		iselect = clamp((inputs[INPUT_SELECT].active) ? inputs[INPUT_SELECT].value * 0.1f * params[PARAM_SELECT].value : params[PARAM_SELECT].value, 0.0, 7.99999f);
 	}
 	recorder.scan(iselect, doscan);
 	recorder.mix(eyeval,morph);
 	for (int i = 0; i < 8; i++) {
 		if (iselect != -1.0){
-			outputs[OUTPUT_EYE+i].value = recorder.output(i);
+			outputs[OUTPUT_EYE + i].value = recorder.output(i);
 		}else{
-			outputs[OUTPUT_EYE+i].value = 0.0f;
+			outputs[OUTPUT_EYE + i].value = 0.0f;
 		}
+		
 	}
 
+	//set eyepatches
+	for (int i = 0; i < 8; i++) {
+		eyepatch_val[i] = recorder.callget(i);
+	}
+	
+	//set displays
+	display_pat = (seq_active) ? strings_pat[int(seq_pattern)] : "OFF";
+	display_len = strings_len[int(seq_len)];
+
+	//recball
+	if (iselect != -1.0){
+		recball_x = recball_xarray[int(iselect)] + 9.0;
+		recball_y = recball_yarray[int(iselect)] + 9.0;
+	}
+	
 }
 
 struct CM3ModuleWidget : ModuleWidget {
@@ -159,8 +187,8 @@ struct CM3ModuleWidget : ModuleWidget {
 	CM3ModuleWidget(CM3Module *module) : ModuleWidget(module) {
 		setPanel(SVG::load(assetPlugin(plugin, "res/CM-3.svg")));
 
-		addChild(Widget::create<ScrewSilver>(Vec(30, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 40, 0)));
+		addChild(Widget::create<ScrewSilver>(Vec(10, 0)));
+		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 20, 0)));
 		addChild(Widget::create<ScrewSilver>(Vec(30, 365)));
 		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 40, 365)));
 
@@ -177,7 +205,7 @@ struct CM3ModuleWidget : ModuleWidget {
 							    145.3 , 119.9 };
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addParam(ParamWidget::create<CM_Recbutton>(Vec(recbuttons[i],recbuttons[i+1] - 0.5), module, y, 0.0f, 1.0f, 0.0f));
+			addParam(ParamWidget::create<CM_Recbutton>(Vec(recbuttons[i],recbuttons[i+1] - 0.5), module, CM3Module::PARAM_REC + y, 0.0f, 1.0f, 0.0f));
 			y++;
 		}
 
@@ -192,7 +220,7 @@ struct CM3ModuleWidget : ModuleWidget {
 							174.5 , 149.0 };
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addInput(Port::create<CM_Input_small>(Vec(recin[i],recin[i+1] - 0.5), Port::INPUT, module, y));
+			addInput(Port::create<CM_Input_small>(Vec(recin[i],recin[i+1] - 0.5), Port::INPUT, module, CM3Module::INPUT_REC + y));
 			y++;
 		}
 
@@ -210,7 +238,7 @@ struct CM3ModuleWidget : ModuleWidget {
 
 		for(int i = 0; i < 16; i += 2){
 			
-			addParam(ParamWidget::create<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, y + 8, -1.0f, 1.0f, 0.0f));
+			addParam(ParamWidget::create<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, CM3Module::PARAM_EYE + y, -1.0f, 1.0f, 0.0f));
 			//addChild(Widget::create<CM_Indicator_bigeye>(Vec(vbigeyes[i]-1,vbigeyes[i+1]-2))); //TODO: rotating indicator that shows output
 			y++;
 		}
@@ -226,7 +254,7 @@ struct CM3ModuleWidget : ModuleWidget {
 							240.3 , 243.4};
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addInput(Port::create<CM_Input_small>(Vec(eyein[i],eyein[i+1] - 0.5), Port::INPUT, module, y + 8));
+			addInput(Port::create<CM_Input_small>(Vec(eyein[i],eyein[i+1] - 0.5), Port::INPUT, module, CM3Module::INPUT_EYE + y));
 			y++;
 		}
 
@@ -241,14 +269,14 @@ struct CM3ModuleWidget : ModuleWidget {
 							304.5 , 281.4};
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addOutput(Port::create<CM_Output_small>(Vec(eyeout[i],eyeout[i+1] - 0.5), Port::OUTPUT, module, y));
+			addOutput(Port::create<CM_Output_small>(Vec(eyeout[i],eyeout[i+1] - 0.5), Port::OUTPUT, module, CM3Module::OUTPUT_EYE + y));
 			y++;
 		}
 
 		//OTHER ELEMENTS
-		addParam(ParamWidget::create<CM_Knob_small_def>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f));
+		addParam(ParamWidget::create<CM_Knob_small_def_half>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Slider_big_red>(Vec(156.5 , 17.9), module, CM3Module::PARAM_MORPH, -1.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Knob_small_def>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f));
+		addParam(ParamWidget::create<CM_Knob_small_def_half>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f));
 		addParam(ParamWidget::create<CM_TryMe_button>(Vec(17.0 , 322.1), module, CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Switch_small>(Vec(137.8 , 309.0), module, CM3Module::PARAM_SCAN, 0.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Knob_huge_red_os>(Vec(161.3 , 286.0), module, CM3Module::PARAM_SELECT, 0.0f, 7.99999f, 0.0f));
@@ -261,12 +289,52 @@ struct CM3ModuleWidget : ModuleWidget {
 
 		addInput(Port::create<CM_Input_def>(Vec(15.7 , 60.1), Port::INPUT, module, CM3Module::INPUT_PATTERN));
 		addInput(Port::create<CM_Input_def>(Vec(94.0 , 38.7), Port::INPUT, module, CM3Module::INPUT_STEP));
-		addInput(Port::create<CM_Input_bpm>(Vec(128.2 , 38.7), Port::INPUT, module, CM3Module::INPUT_BPM));
+		addInput(Port::create<CM_Input_bpm>(Vec(127.5 , 38.7), Port::INPUT, module, CM3Module::INPUT_BPM));
 		addInput(Port::create<CM_Input_def>(Vec(183.5 , 45.4), Port::INPUT, module, CM3Module::INPUT_MORPH));
 		addInput(Port::create<CM_Input_def>(Vec(250.8 , 38.7), Port::INPUT, module, CM3Module::INPUT_RESET));
 		addInput(Port::create<CM_Input_def>(Vec(352.3 , 61.4), Port::INPUT, module, CM3Module::INPUT_LENGTH));
 		addInput(Port::create<CM_Input_def>(Vec(183.5 , 259.0), Port::INPUT, module, CM3Module::INPUT_SELECT));
-	}
+
+		//LCD display pattern
+		TxtDisplayWidget *dispat = new TxtDisplayWidget();
+		dispat->box.pos = Vec(29.9, 11.0);
+		dispat->box.size = Vec(38.0 , 20.4);
+		dispat->txt = &module->display_pat;
+		addChild(dispat);
+
+		//LCD display length
+		TxtDisplayWidget *dislen = new TxtDisplayWidget();
+		dislen->box.pos = Vec(322.4 , 11.0);
+		dislen->box.size = Vec(38.0 , 20.4);
+		dislen->txt = &module->display_len;
+		addChild(dislen);
+
+		//selector indicator green
+		CM3_RecBall *recball = new CM3_RecBall();
+		recball->box.size = Vec(32.0, 32.0);
+		recball->recball_x = &module->recball_x;
+		recball->recball_y = &module->recball_y;
+		addChild(recball);
+
+		//eyepatches: indicate the actual output
+		float dd = 20.5; //distance from origin
+		float rr = 2.5; //radius of circle
+		CM3_EyePatch *eyepatch[8] = {
+			new CM3_EyePatch(77.4, 117.4 , dd, rr),
+			new CM3_EyePatch(55.2, 169.1 , dd, rr),
+			new CM3_EyePatch(77.4 , 220.9 , dd, rr),
+			new CM3_EyePatch(107.0 , 272.6 , dd, rr),
+			new CM3_EyePatch(313.2 , 117.4 , dd, rr),
+			new CM3_EyePatch(335.4 , 169.1 , dd, rr),
+			new CM3_EyePatch(313.2 , 220.9 , dd, rr),
+			new CM3_EyePatch(283.6 , 272.6 , dd, rr)
+		};
+
+		for(int i = 0; i < 8; i ++){
+				eyepatch[i]->eyepatch_val = &module->eyepatch_val[i];
+				addChild(eyepatch[i]);
+		}
+	};
 };
 
 

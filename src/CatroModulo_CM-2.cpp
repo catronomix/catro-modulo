@@ -38,15 +38,18 @@ void CM2Module::step() {
 		if (inputs[i].active == true || outputs[i].active == true) {
 			int j = i + 8;
 			if (inputs[i].active == true) {
-				out = clamp(inputs[i].value * params[i].value + params[j].value * 5.0f, -10.0f, 10.0f);
+				out = clamp(inputs[i].value * params[i].value + params[j].value * 10.0f, -10.0f, 10.0f);
 				mixOut += out;
 			} else {
-				out = clamp(params[i].value + params[j].value * 5.0f, -10.0f, 10.0f);
+				out = clamp(params[j].value * 10.0f, -10.0f, 10.0f);
 			}
 			outputs[i].value = out;
 			
-			lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.2f));
-			lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.2f));
+			lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.1f));
+			lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.1f));
+		} else {
+			lights[2*i + 0].setBrightnessSmooth(0.0f);
+			lights[2*i + 1].setBrightnessSmooth(0.0f);
 		}
 		if (numconnect > 0) {
 			outputs[8].value = mixOut / numconnect;

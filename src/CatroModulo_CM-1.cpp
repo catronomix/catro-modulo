@@ -16,7 +16,7 @@ struct LowFrequencyOscillator {
 
 	LowFrequencyOscillator() {}
 	void setPitch(float pitch) {
-		pitch = fminf(pitch, 10.0f);
+		pitch = fminf(pitch, 13.0f);
 		freq = powf(2.0f, pitch);
 	}
 	void setPulseWidth(float pw_) {
@@ -71,14 +71,14 @@ struct LowFrequencyOscillator {
 	float tmix() {
 		float tmr = 0.0f;
 		if (typemix < 1.0f){
-			tmr = (1.0f - typemix) * sin() + typemix * sqr();
+			tmr = (1.0f - typemix) * sin() + typemix * tri();
 		}else 
 		if (typemix < 2.0f){
 			typemix -= 1.0f;
-			tmr = (1.0f - typemix) * sqr() + typemix * saw();
+			tmr = (1.0f - typemix) * tri() + typemix * saw();
 		}else {
 			typemix -= 2.0f;
-			tmr = (1.0f - typemix) * saw() + typemix * tri();
+			tmr = (1.0f - typemix) * saw() + typemix * sqr();
 		}
 		return tmr;
 	}
@@ -115,6 +115,7 @@ struct CM1Module : Module {
 	// - onReset, onRandomize, onCreate, onDelete: implements special behavior when user clicks these from the context menu
 };
 
+//Tarzan - this is for TJ :)
 
 void CM1Module::step() {
 	float mixOut = 0.0f;
@@ -125,9 +126,9 @@ void CM1Module::step() {
 		if (outputs[i].active == true){
 		//merge modulations
 		float mod_one = clamp((inputs[i].active) ? params[i].value * inputs[i].value * 0.1f : params[i].value, 0.0f, 3.0f); //TYPE
-		float mod_two = clamp((inputs[i+8].active) ? params[i+8].value * inputs[i+8].value * 0.1f : params[i+8].value, -8.0f, 10.0f); //RATE
-		float mod_thr = clamp((inputs[i+16].active) ? params[i+16].value * inputs[i+16].value * 0.1f : params[i+16].value, 0.0f, 1.0f); //PW
-		float mod_fou = clamp((inputs[i+24].active) ? params[i+24].value * inputs[i+24].value * 0.1f : params[i+24].value, 0.0f, 1.0f); //PHASE
+		float mod_two = clamp((inputs[i+8].active) ? (params[i+8].value -8) + (clamp(inputs[i+8].value * 0.1, -1.0f, 1.0f) * 21) : params[i+8].value -8.0 , -8.0f, 13.0f); //RATE
+		float mod_thr = clamp((inputs[i+16].active) ? params[i+16].value * (1.0 + inputs[i+16].value) * 0.05f : params[i+16].value, 0.0f, 1.0f); //PW
+		float mod_fou = clamp((inputs[i+24].active) ? params[i+24].value + inputs[i+24].value * 0.1f : params[i+24].value, 0.0f, 1.0f); //PHASE
 		
 
 		//set lfo mods
@@ -168,7 +169,7 @@ struct CM1ModuleWidget : ModuleWidget {
 
 		//GRID
 		const float gridrowjacks[8] = {35.5, 74.3, 113.1, 151.9, 190.7, 229.5, 268.2, 307};
-		const float gridcoljacks[10] = {3.7, 29.9, 64.8, 94.1, 126.0, 155.1, 186.4, 215.8, 249.2, 279.3};
+		const float gridcoljacks[10] = {3.7, 29.9, 64.8, 94.1, 126.0, 155.1, 186.4, 215.8, 249.2, 278.5};
 		
 		//COL 1 IN TYPE
 		int i = -1;
@@ -227,7 +228,7 @@ struct CM1ModuleWidget : ModuleWidget {
 		//COL 2 KNOBS RATE
 		i = -1;
 		while(++i < 8){
-			addParam(ParamWidget::create<CM_Knob_small_def>(Vec(gridcoljacks[3], gridrowjacks[i] + 7.0), module, i+8, -8.0f, 10.0f, 1.0f));
+			addParam(ParamWidget::create<CM_Knob_small_def>(Vec(gridcoljacks[3], gridrowjacks[i] + 7.0), module, i+8, 0.0f, 21.0f, 9.0f));
 		}
 
 		//COL 3 KNOBS PW

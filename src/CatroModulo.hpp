@@ -13,6 +13,7 @@ extern Model *modelCM3Module;
 extern Model *modelCM4Module;
 extern Model *modelCM5Module;
 extern Model *modelCM6Module;
+extern Model *modelCM7Module;
 
 struct CM_Knob_small_def : SVGKnob {
 	CM_Knob_small_def() {
@@ -208,6 +209,7 @@ struct CM_Slider_big_red : SVGSlider {
 		maxHandlePos = Vec(58, 0);
 		setSVGs(SVG::load(assetPlugin(plugin, "res/CM-slider_big_red_bg.svg")), SVG::load(assetPlugin(plugin, "res/CM-slider_big_red.svg")));
 	}
+	void onDragMove(EventDragMove& e) override;
 };
 
 struct CM_Switch_small_3 : SVGSwitch, ToggleSwitch {
@@ -432,6 +434,10 @@ struct CM_Recorder {
 		lastscan = scanner;
 	}
 
+	float callget(int eye){
+		return call[eye];
+	}
+
 	//mix amount is between -1.0 and 1.0
 	void mix(float *eyeval, float amount){
 		if (amount >= 0.0f){
@@ -486,9 +492,7 @@ struct CM_BpmClock {
 	}
 
 	float addcv(float cv){
-		clk_bpm += cvtobpm(cv);
-		bpm_cv += cv;
-		// freq = clk_bpm / 30.0; //double freq! -for halfstep
+		setbpm(clk_bpm + cvtobpm(cv));
 		return bpm_cv;
 	}
 
@@ -559,38 +563,133 @@ struct NumDisplayWidget : TransparentWidget {
   float *value;
   std::shared_ptr<Font> font;
 
-  NumDisplayWidget() {
-    font = Font::load(assetPlugin(plugin, "res/Segment7Standard.ttf"));
-  };
+	NumDisplayWidget() {
+		font = Font::load(assetPlugin(plugin, "res/Segment7Standard.ttf"));
+	};
 
-  void draw(NVGcontext *vg) override {
-    // Background
-    NVGcolor backgroundColor = nvgRGB(0x25, 0x2f, 0x24);
-    NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
-    nvgBeginPath(vg);
-    nvgRoundedRect(vg, 0.0, 0.0, box.size.x, box.size.y, 4.0);
-    nvgFillColor(vg, backgroundColor);
-    nvgFill(vg);
-    nvgStrokeWidth(vg, 1.0);
-    nvgStrokeColor(vg, borderColor);
-    nvgStroke(vg);
+	void draw(NVGcontext *vg) override {
+		// Background
+		NVGcolor backgroundColor = nvgRGB(0x25, 0x2f, 0x24);
+		NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, 0.0, 0.0, box.size.x, box.size.y, 4.0);
+		nvgFillColor(vg, backgroundColor);
+		nvgFill(vg);
+		nvgStrokeWidth(vg, 1.0);
+		nvgStrokeColor(vg, borderColor);
+		nvgStroke(vg);
 
-    nvgFontSize(vg, 16);
-    nvgFontFaceId(vg, font->handle);
-    nvgTextLetterSpacing(vg, 2.2);
+		nvgFontSize(vg, 16);
+		nvgFontFaceId(vg, font->handle);
+		nvgTextLetterSpacing(vg, 2.2);
 
-    std::string to_display = std::to_string(*value).substr(0,5);
-	while(to_display.length()<5) to_display = ' ' + to_display;
+		std::string to_display = std::to_string(*value).substr(0,5);
+		while(to_display.length()< 5 ) to_display = ' ' + to_display;
 
-    Vec textPos = Vec(3.0f, 17.0f);
+		Vec textPos = Vec(3.0f, 17.0f);
 
-    NVGcolor textColor = nvgRGB(0xff, 0xf4, 0x00);
-    nvgFillColor(vg, nvgTransRGBA(textColor, 16));
-    nvgText(vg, textPos.x, textPos.y, "~~~~~", NULL);
-    nvgText(vg, textPos.x, textPos.y, ".....", NULL);
-	nvgText(vg, textPos.x, textPos.y, "\\\\\\\\\\", NULL);
+		NVGcolor textColor = nvgRGB(0xff, 0xf4, 0x00);
+		nvgFillColor(vg, nvgTransRGBA(textColor, 16));
+		nvgText(vg, textPos.x, textPos.y, "~~~~~", NULL);
+		nvgText(vg, textPos.x, textPos.y, ".....", NULL);
+		nvgText(vg, textPos.x, textPos.y, "\\\\\\\\\\", NULL);
 
-    nvgFillColor(vg, textColor);
-    nvgText(vg, textPos.x, textPos.y, to_display.c_str(), NULL);
-  }
+		nvgFillColor(vg, textColor);
+		nvgText(vg, textPos.x, textPos.y, to_display.c_str(), NULL);
+	}
 };
+
+struct TxtDisplayWidget : TransparentWidget {
+
+  std::string *txt;
+  std::shared_ptr<Font> font;
+
+	TxtDisplayWidget() {
+		font = Font::load(assetPlugin(plugin, "res/Segment7Standard.ttf"));
+	};
+
+	void draw(NVGcontext *vg) override {
+		// Background
+		NVGcolor backgroundColor = nvgRGB(0x25, 0x2f, 0x24);
+		NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, 0.0, 0.0, box.size.x, box.size.y, 4.0);
+		nvgFillColor(vg, backgroundColor);
+		nvgFill(vg);
+		nvgStrokeWidth(vg, 1.0);
+		nvgStrokeColor(vg, borderColor);
+		nvgStroke(vg);
+
+		nvgFontSize(vg, 16);
+		nvgFontFaceId(vg, font->handle);
+		nvgTextLetterSpacing(vg, 2.2);
+
+		std::string to_display = *txt;
+		while(to_display.length()< 3 ) to_display = ' ' + to_display;
+
+		Vec textPos = Vec(3.0f, 17.0f);
+
+		NVGcolor textColor = nvgRGB(0xff, 0xf4, 0x00);
+		nvgFillColor(vg, nvgTransRGBA(textColor, 16));
+		nvgText(vg, textPos.x, textPos.y, "~~~", NULL);
+		nvgText(vg, textPos.x, textPos.y, "...", NULL);
+		nvgText(vg, textPos.x, textPos.y, "\\\\\\", NULL);
+
+		nvgFillColor(vg, textColor);
+		nvgText(vg, textPos.x, textPos.y, to_display.c_str(), NULL);
+	}
+};
+
+struct CM3_RecBall : TransparentWidget {
+
+	float *recball_x;
+	float *recball_y;
+
+	CM3_RecBall() {};
+
+	void draw(NVGcontext *vg) override {
+		//position
+		box.pos.x = *recball_x;
+		box.pos.y = *recball_y;
+		// circle
+		NVGcolor green = nvgRGB(0x00, 0xbb, 0x00);
+		nvgBeginPath(vg);
+		nvgCircle(vg, 7.0, 7.0, 8.0);
+		nvgFillColor(vg, green);
+		nvgFill(vg);
+	}
+};
+
+struct CM3_EyePatch : TransparentWidget {
+
+	float *eyepatch_val;
+	float dd;
+	float rr;
+
+	CM3_EyePatch(float x, float y, float d, float r) {
+		box.pos.x = x;
+		box.pos.y = y;
+		dd = d;
+		rr = r;
+	};
+
+	void draw(NVGcontext *vg) override {
+
+		//position
+		 float relx = -dd * -sin(*eyepatch_val * M_PI);
+		 float rely = dd * -cos(*eyepatch_val * M_PI);
+		
+		// circle
+		nvgBeginPath(vg);
+		nvgCircle(vg, relx, rely, rr);
+		nvgFillColor(vg, COLOR_WHITE);
+		nvgFill(vg);
+
+		//center
+		// nvgBeginPath(vg);
+		// nvgCircle(vg, 0, 0, 1.0);
+		// nvgFillColor(vg, COLOR_RED);
+		// nvgFill(vg);
+	}
+};
+
