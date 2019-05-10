@@ -1,5 +1,7 @@
 #include "rack.hpp"
 #include "dsp/digital.hpp"
+#include "CM_helpers.hpp"
+
 using namespace rack;
 
 
@@ -14,6 +16,7 @@ extern Model *modelCM4Module;
 extern Model *modelCM5Module;
 extern Model *modelCM6Module;
 extern Model *modelCM7Module;
+extern Model *modelCM8Module;
 
 struct CM_Knob_small_def : SVGKnob {
 	CM_Knob_small_def() {
@@ -25,13 +28,10 @@ struct CM_Knob_small_def : SVGKnob {
 	}
 };
 
-struct CM_Knob_small_def_half : SVGKnob {
+struct CM_Knob_small_def_half : CM_Knob_small_def {
 	CM_Knob_small_def_half() {
 		minAngle = -0.5*M_PI;
-		maxAngle = 0.5*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_small_def.svg")));
-        shadow->opacity = 0;
-        
+		maxAngle = 0.5*M_PI;        
 	}
 };
 
@@ -54,6 +54,13 @@ struct CM_Knob_big_def : SVGKnob {
 	}
 };
 
+struct CM_Knob_big_def_tt : CM_Knob_big_def {
+	CM_Knob_big_def_tt() {
+		minAngle = -0.75*M_PI;
+		maxAngle = 0.75*M_PI;
+	}
+};
+
 struct CM_Knob_big_red : SVGKnob {
 	CM_Knob_big_red() {
 		minAngle = -1.0*M_PI;
@@ -71,12 +78,10 @@ struct CM_Knob_huge_red : SVGKnob {
         shadow->opacity = 0;
 	}
 };
-struct CM_Knob_huge_red_os : SVGKnob {
+struct CM_Knob_huge_red_os : CM_Knob_huge_red {
 	CM_Knob_huge_red_os() {
 		minAngle = 0.0*M_PI;
 		maxAngle = 2.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_huge_red.svg")));
-        shadow->opacity = 0;
 	}
 };
 
@@ -219,8 +224,10 @@ struct CM_Switch_small_3 : SVGSwitch, ToggleSwitch {
 		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_2.svg")));
 	}
 };
-//classes
 
+
+
+//structs
 //SELECT sequencer
 struct CM_SelSeq {
 	private:
@@ -334,7 +341,7 @@ struct CM_SelSeq {
 	float sequence(int pat){
 		if (dostep == true){
 			if (pat == 15){
-				recsel = rand() % 8;
+				recsel = cm_gauss(4.0, 4.0);
 			}else{
 				recsel = patterns[pat][astep];
 			}
