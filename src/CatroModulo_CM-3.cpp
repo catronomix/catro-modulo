@@ -1,6 +1,6 @@
 #include "CatroModulo.hpp"
 
-//Catro-Module CM3: PreSetSeq
+//Catro-Modulo CM3: PreSetSeq
 
 struct CM3Module : Module {
 
@@ -239,7 +239,6 @@ struct CM3ModuleWidget : ModuleWidget {
 		for(int i = 0; i < 16; i += 2){
 			
 			addParam(ParamWidget::create<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, CM3Module::PARAM_EYE + y, -1.0f, 1.0f, 0.0f));
-			//addChild(Widget::create<CM_Indicator_bigeye>(Vec(vbigeyes[i]-1,vbigeyes[i+1]-2))); //TODO: rotating indicator that shows output
 			y++;
 		}
 
@@ -309,7 +308,7 @@ struct CM3ModuleWidget : ModuleWidget {
 		dislen->txt = &module->display_len;
 		addChild(dislen);
 
-		//selector indicator green
+		//selector indicator yellow
 		CM3_RecBall *recball = new CM3_RecBall();
 		recball->box.size = Vec(32.0, 32.0);
 		recball->recball_x = &module->recball_x;

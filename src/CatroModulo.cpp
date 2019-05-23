@@ -17,6 +17,8 @@ void init(Plugin *p) {
 	p->addModel(modelCM6Module);
 	p->addModel(modelCM7Module);
 	p->addModel(modelCM8Module);
+	p->addModel(modelCM9Module);
+	p->addModel(modelCM10Module);
 
 	// Any other plugin initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup times of Rack.

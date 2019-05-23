@@ -53,5 +53,3 @@ float cm_gauss(float size, float offset){
     return cm_gauss(size) + offset;
 }
 
-
-
