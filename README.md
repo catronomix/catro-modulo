@@ -1,6 +1,8 @@
 
 # Catro/Modulo modules for VCV Rack
 
+# You are browsing the upcoming release 0.6.6 which is not finished yet and I'm not responsible if your computer explodes.
+
 ## CM 0.6.5 has been released, please see release notes: <br>https://github.com/catronomix/catro-modulo/releases/tag/0.6.5 <br> This readme will be updated soon
 
 ![screenshot1](https://github.com/catronomix/catro-modulo/blob/master/catromodulo_1.png?raw=true)

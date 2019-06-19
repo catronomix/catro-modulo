@@ -1,6 +1,6 @@
 #include "CatroModulo.hpp"
 
-//Catro-Module CM3: PreSetSeq
+//Catro-Modulo CM3: PreSetSeq
 
 struct CM3Module : Module {
 
@@ -29,6 +29,7 @@ struct CM3Module : Module {
 		INPUT_LENGTH,
 		INPUT_SELECT,
 		INPUT_BPM,
+		INPUT_TRYME,
 		NUM_INPUTS
 	};
 	enum OutputIds {
@@ -98,6 +99,8 @@ struct CM3Module : Module {
 
 void CM3Module::step() {
 
+	//process tryme button
+	recorder.tryme((params[PARAM_TRYME].value || inputs[INPUT_TRYME].value) * 10.0);
 
 	//mix params and inputs
 	float morph = (inputs[INPUT_MORPH].active) ? inputs[INPUT_MORPH].value * 0.1f + params[PARAM_MORPH].value : params[PARAM_MORPH].value;
@@ -121,9 +124,6 @@ void CM3Module::step() {
 	}else{
 		seq_step = (inputs[INPUT_STEP].value || params[PARAM_STEP].value);
 	}
-
-	//process tryme button
-	recorder.tryme(params[PARAM_TRYME].value);
 
 
 	//process eyes
@@ -239,7 +239,6 @@ struct CM3ModuleWidget : ModuleWidget {
 		for(int i = 0; i < 16; i += 2){
 			
 			addParam(ParamWidget::create<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, CM3Module::PARAM_EYE + y, -1.0f, 1.0f, 0.0f));
-			//addChild(Widget::create<CM_Indicator_bigeye>(Vec(vbigeyes[i]-1,vbigeyes[i+1]-2))); //TODO: rotating indicator that shows output
 			y++;
 		}
 
@@ -277,7 +276,7 @@ struct CM3ModuleWidget : ModuleWidget {
 		addParam(ParamWidget::create<CM_Knob_small_def_half>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Slider_big_red>(Vec(156.5 , 17.9), module, CM3Module::PARAM_MORPH, -1.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Knob_small_def_half>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f));
-		addParam(ParamWidget::create<CM_TryMe_button>(Vec(17.0 , 322.1), module, CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f));
+		addParam(ParamWidget::create<CM_TryMe_button>(Vec(15.0 , 320.1), module, CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Switch_small>(Vec(137.8 , 309.0), module, CM3Module::PARAM_SCAN, 0.0f, 1.0f, 0.0f));
 		addParam(ParamWidget::create<CM_Knob_huge_red_os>(Vec(161.3 , 286.0), module, CM3Module::PARAM_SELECT, 0.0f, 7.99999f, 0.0f));
 		//addParam(ParamWidget::create<CM_Knob_small_def>(Vec(232.2 , 304.5), module,PARAM_Q, 0.1f, 0.9f, 0.5f)); //maybe implement later?
@@ -294,6 +293,8 @@ struct CM3ModuleWidget : ModuleWidget {
 		addInput(Port::create<CM_Input_def>(Vec(250.8 , 38.7), Port::INPUT, module, CM3Module::INPUT_RESET));
 		addInput(Port::create<CM_Input_def>(Vec(352.3 , 61.4), Port::INPUT, module, CM3Module::INPUT_LENGTH));
 		addInput(Port::create<CM_Input_def>(Vec(183.5 , 259.0), Port::INPUT, module, CM3Module::INPUT_SELECT));
+		addInput(Port::create<CM_Input_def>(Vec(42.2 , 320.8), Port::INPUT, module, CM3Module::INPUT_TRYME));
+
 
 		//LCD display pattern
 		TxtDisplayWidget *dispat = new TxtDisplayWidget();
@@ -309,7 +310,7 @@ struct CM3ModuleWidget : ModuleWidget {
 		dislen->txt = &module->display_len;
 		addChild(dislen);
 
-		//selector indicator green
+		//selector indicator yellow
 		CM3_RecBall *recball = new CM3_RecBall();
 		recball->box.size = Vec(32.0, 32.0);
 		recball->recball_x = &module->recball_x;
@@ -342,4 +343,4 @@ struct CM3ModuleWidget : ModuleWidget {
 // author name for categorization per plugin, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM3Module = Model::create<CM3Module, CM3ModuleWidget>("CatroModulo", "CatroModulo_CM-3", "C/M3 : PreSetSeq", SEQUENCER_TAG);
+Model *modelCM3Module = Model::create<CM3Module, CM3ModuleWidget>("CatroModulo", "CatroModulo_CM-3", "PreSetSeq", SEQUENCER_TAG);

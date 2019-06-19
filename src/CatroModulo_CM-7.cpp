@@ -70,11 +70,11 @@ void CM7Module::step() {
 	outputs[OUTPUT_BPM_9].value = clock5.getcv();
 
     //add second bpm cv input
-	clock1.addcv(inputs[INPUT_BPM2].value * 0.5);
-	clock2.addcv(inputs[INPUT_BPM2].value / 3.0);
-	clock3.addcv(inputs[INPUT_BPM2].value * 0.2);
-	clock4.addcv(inputs[INPUT_BPM2].value / 7.0);
-	clock5.addcv(inputs[INPUT_BPM2].value / 9.0);
+	clock1.addcv(0 - inputs[INPUT_BPM2].value * 0.5);
+	clock2.addcv(0 - inputs[INPUT_BPM2].value / 3.0);
+	clock3.addcv(0 - inputs[INPUT_BPM2].value * 0.2);
+	clock4.addcv(0 - inputs[INPUT_BPM2].value / 7.0);
+	clock5.addcv(0 - inputs[INPUT_BPM2].value / 9.0);
 
     //perform reset if needed
 	clock1.setReset(inputs[INPUT_RST].value || params[PARAM_RST].value);
@@ -156,4 +156,4 @@ struct CM7ModuleWidget : ModuleWidget {
 // author name for categorization per plugin, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM7Module = Model::create<CM7Module, CM7ModuleWidget>("CatroModulo", "CatroModulo_CM-7", "C/M7 : vcClk--", CLOCK_TAG);
+Model *modelCM7Module = Model::create<CM7Module, CM7ModuleWidget>("CatroModulo", "CatroModulo_CM-7", "vcClk--", CLOCK_TAG);

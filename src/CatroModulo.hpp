@@ -1,5 +1,7 @@
 #include "rack.hpp"
 #include "dsp/digital.hpp"
+#include "CM_helpers.hpp"
+
 using namespace rack;
 
 
@@ -14,7 +16,11 @@ extern Model *modelCM4Module;
 extern Model *modelCM5Module;
 extern Model *modelCM6Module;
 extern Model *modelCM7Module;
+extern Model *modelCM8Module;
+extern Model *modelCM9Module;
+extern Model *modelCM10Module;
 
+//interface elements
 struct CM_Knob_small_def : SVGKnob {
 	CM_Knob_small_def() {
 		minAngle = -1.0*M_PI;
@@ -25,13 +31,10 @@ struct CM_Knob_small_def : SVGKnob {
 	}
 };
 
-struct CM_Knob_small_def_half : SVGKnob {
+struct CM_Knob_small_def_half : CM_Knob_small_def {
 	CM_Knob_small_def_half() {
 		minAngle = -0.5*M_PI;
-		maxAngle = 0.5*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_small_def.svg")));
-        shadow->opacity = 0;
-        
+		maxAngle = 0.5*M_PI;        
 	}
 };
 
@@ -54,6 +57,31 @@ struct CM_Knob_big_def : SVGKnob {
 	}
 };
 
+struct CM_Knob_big_attn : SVGKnob {
+	CM_Knob_big_attn() {
+		minAngle = -1.0*M_PI;
+		maxAngle = 1.0*M_PI;
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_big_attn.svg")));
+        shadow->opacity = 0;
+	}
+};
+
+struct CM_Knob_big_offset : SVGKnob {
+	CM_Knob_big_offset() {
+		minAngle = -1.0*M_PI;
+		maxAngle = 1.0*M_PI;
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_big_offset.svg")));
+        shadow->opacity = 0;
+	}
+};
+
+struct CM_Knob_big_def_tt : CM_Knob_big_def {
+	CM_Knob_big_def_tt() {
+		minAngle = -0.75*M_PI;
+		maxAngle = 0.75*M_PI;
+	}
+};
+
 struct CM_Knob_big_red : SVGKnob {
 	CM_Knob_big_red() {
 		minAngle = -1.0*M_PI;
@@ -71,18 +99,10 @@ struct CM_Knob_huge_red : SVGKnob {
         shadow->opacity = 0;
 	}
 };
-struct CM_Knob_huge_red_os : SVGKnob {
+struct CM_Knob_huge_red_os : CM_Knob_huge_red {
 	CM_Knob_huge_red_os() {
 		minAngle = 0.0*M_PI;
 		maxAngle = 2.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_huge_red.svg")));
-        shadow->opacity = 0;
-	}
-};
-
-struct CM_Indicator_bigeye : SVGWidget {
-	CM_Indicator_bigeye() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-indicator_bigeye.svg")));
 	}
 };
 
@@ -94,7 +114,6 @@ struct CM_Knob_bigeye : SVGKnob {
         shadow->opacity = 0;
 	}
 };
-
 
 struct CM_Pot1_small : SVGScrew {
 	CM_Pot1_small() {
@@ -161,6 +180,13 @@ struct CM_Output_def : SVGPort {
 	}
 };
 
+struct CM_Output_def_dark : SVGPort {
+	CM_Output_def_dark() {
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_def)dark.svg")));
+        shadow->opacity = 0;
+	}
+};
+
 struct CM_Output_small : SVGPort {
 	CM_Output_small() {
 		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_small.svg")));
@@ -219,7 +245,10 @@ struct CM_Switch_small_3 : SVGSwitch, ToggleSwitch {
 		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_2.svg")));
 	}
 };
-//classes
+
+
+
+//mechanisms
 
 //SELECT sequencer
 struct CM_SelSeq {
@@ -334,7 +363,7 @@ struct CM_SelSeq {
 	float sequence(int pat){
 		if (dostep == true){
 			if (pat == 15){
-				recsel = rand() % 8;
+				recsel = cm_gauss(4.0, 4.0);
 			}else{
 				recsel = patterns[pat][astep];
 			}
@@ -392,8 +421,8 @@ struct CM_Recorder {
 		if (randomTrigger.process(dotry)){
 			for (int i = 0; i < 8; i++){
 				for (int j = 0; j < 8; j++) {
-					rand(); rand(); //call random twice to get more random
-					store[i][j] = ((double) rand() / (RAND_MAX)); 
+					// rand(); rand(); //call random twice to get more random // might be too slow... 
+					store[i][j] = 2.0 * ((double) rand() / (RAND_MAX)) - 1.0; 
 				}
 			}
 			reset();
@@ -455,6 +484,89 @@ struct CM_Recorder {
 		return out[index] * 10.0f;
 	}
 };
+
+//try something else?
+// struct CM_BpmStreamer {
+// 	int mcount = 0;
+// 	float bpm_cv = 0;
+// 	float reset = 0;
+// 	float demuxbuffer[4] = {};
+
+// 	CM_BpmStreamer(){}
+
+// 	void step(){
+// 		mcount = (mcount < 3) ? mcount + 1 : 0;
+// 	}
+
+// 	float mux(){
+// 		float muxed = 0.0;
+// 		if (mcount == 0){
+// 			muxed = -5.1;
+// 		}
+// 		if (mcount == 1){
+// 			muxed = bpm_cv;
+// 		}
+// 		if (mcount == 2){
+// 			muxed = reset;
+// 		}
+// 		if (mcount == 3){
+// 			muxed = -10.1;
+// 		}
+// 		return muxed;
+// 	}
+
+// 	float mux(float signal){
+// 		float muxed = 0.0;
+// 		if (mcount == 0){
+// 			muxed = -5.1;
+// 		}
+// 		if (mcount == 1){
+// 			muxed = signal;
+// 		}
+// 		if (mcount == 2){
+// 			muxed = reset;
+// 		}
+// 		if (mcount == 3){
+// 			muxed = -10.1;
+// 		}
+// 		return muxed;
+// 	}
+
+// 	bool demux(float signal){
+// 		demuxbuffer[3] = demuxbuffer[2];
+// 		demuxbuffer[2] = demuxbuffer[1];
+// 		demuxbuffer[1] = demuxbuffer[0];
+// 		demuxbuffer[0] = signal;
+// 		if (demuxbuffer[0] == -10.1 && demuxbuffer[3] == -5.1){
+// 			bpm_cv = demuxbuffer[2];
+// 			reset = demuxbuffer[1];
+// 			return true;
+// 		}else{
+// 			return false;
+// 		}
+// 	}
+
+// 	float test(){
+// 		return (demuxbuffer[0] < -10.0 && demuxbuffer[0] > -11.0) * 10.0;
+// 	}
+
+// 	void setcv(float cv){
+// 		bpm_cv = cv;
+// 	}
+
+// 	void setreset(float rst){
+// 		reset = (rst >= 5.0) ? 10.0 : 0.0;
+// 	}
+
+// 	float getcv(){
+// 		return bpm_cv;
+// 	}
+
+// 	float getreset(){
+// 		return reset;
+// 	}
+
+// };
 
 //BPM system
 struct CM_BpmClock {
@@ -557,6 +669,35 @@ struct CM_BpmClock {
 	}
 };
 
+//simple stepper (count start at 0)
+struct CM_stepper {
+	private:
+	int step_active = 0;
+	int step_max = 8;
+	bool isreset = false;
+	int cooldown = 0;
+
+	public:
+
+	CM_stepper(){}
+
+	void reset(){
+		isreset = true;
+	}
+
+	//advance step, return to 0 on reaching max;
+	int step(int max){
+		step_max = max;
+		if (step_active < step_max && isreset == false){
+			step_active++;
+		}else{
+			step_active = 0;
+			isreset = false;
+		}
+		return step_active;
+	}
+};
+
 //LCD display (from cf modules)
 struct NumDisplayWidget : TransparentWidget {
 
@@ -599,6 +740,7 @@ struct NumDisplayWidget : TransparentWidget {
 	}
 };
 
+//TEXT LCD display
 struct TxtDisplayWidget : TransparentWidget {
 
   std::string *txt;
@@ -640,6 +782,7 @@ struct TxtDisplayWidget : TransparentWidget {
 	}
 };
 
+//recorder buttons for CM3
 struct CM3_RecBall : TransparentWidget {
 
 	float *recball_x;
@@ -652,14 +795,15 @@ struct CM3_RecBall : TransparentWidget {
 		box.pos.x = *recball_x;
 		box.pos.y = *recball_y;
 		// circle
-		NVGcolor green = nvgRGB(0x00, 0xbb, 0x00);
+		NVGcolor yellow = nvgRGB(0xff, 0xf4, 0x00);
 		nvgBeginPath(vg);
 		nvgCircle(vg, 7.0, 7.0, 8.0);
-		nvgFillColor(vg, green);
+		nvgFillColor(vg, yellow);
 		nvgFill(vg);
 	}
 };
 
+//bigeye indicators 
 struct CM3_EyePatch : TransparentWidget {
 
 	float *eyepatch_val;
@@ -685,11 +829,50 @@ struct CM3_EyePatch : TransparentWidget {
 		nvgFillColor(vg, COLOR_WHITE);
 		nvgFill(vg);
 
-		//center
-		// nvgBeginPath(vg);
-		// nvgCircle(vg, 0, 0, 1.0);
-		// nvgFillColor(vg, COLOR_RED);
-		// nvgFill(vg);
 	}
 };
 
+//yellow led in CM9
+struct CM9_LedIndicator : SVGWidget {
+
+	float *posx;
+	float *posy;
+
+	CM9_LedIndicator() {
+		setSVG(SVG::load(assetPlugin(plugin, "res/CM9_ledinc.svg")));
+		wrap();
+	};
+
+	void draw(NVGcontext *vg) override {
+		box.pos.x = *posx;
+		box.pos.y = *posy;
+		SVGWidget::draw(vg);
+	}
+};
+
+//yellow big led indicator
+struct BigLedIndicator : TransparentWidget {
+
+  bool *lit;
+
+	BigLedIndicator() {};
+
+	void draw(NVGcontext *vg) override {
+		// Background
+		NVGcolor backgroundColor = nvgRGB(0x25, 0x2f, 0x24);
+		NVGcolor borderColor = nvgRGB(0x10, 0x10, 0x10);
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, 0.0, 0.0, box.size.x, box.size.y, 5.0);
+		nvgFillColor(vg, backgroundColor);
+		nvgFill(vg);
+		nvgStrokeWidth(vg, 1.5);
+		nvgStrokeColor(vg, borderColor);
+		nvgStroke(vg);
+		if (*lit == true){
+			nvgBeginPath(vg);
+			nvgRoundedRect(vg, 4.0, 4.0, box.size.x - 8.0, box.size.y - 8.0, 4.0);
+			nvgFillColor(vg, nvgRGB(0xff, 0xf4, 0x00));
+			nvgFill(vg);;
+		}	
+	}
+};
