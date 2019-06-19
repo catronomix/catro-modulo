@@ -9,12 +9,14 @@ Full manual (old version, update will follow): https://github.com/catronomix/cat
 
 CM-1: 8xlfo <br>
 8 LFOs that blend between sine, square, saw and triangle waves
-Rate is from very slow to audio rate
-Mix output is the average of all LFOs
+Rate is from very very slow to audio rate
+The rate can be synced to a bpm cv signal from vcClk (from /32 up to x32)
+Mix output is the average of all LFOs with a connected output
 
 CM-2: 8xatn<br>
-8 attenuverters with offset
+8 attenuverters with scale and offset parameters, as well as modulation cv inputs
 Mix output is the average of all outputs that have an input connected
+x2 overdrive switch for amplifying signals (useful for changing ±5V to ±10V)
 
 CM-3: PreSetSeq<br>
 Preset sequencer and morpher 
