@@ -33,7 +33,7 @@ script:
 deploy:
   provider: releases
   api_key:
-    secure: mcYESQ6Co3eG0MCZJkZgScUOi6xSskRJUC/8YBXgU8jFFP+VbgQH+BLXMcpZXk3PXDCqdnBzQtxC3oT+KdaM2O7c5t8Y89BrlbXKp2sHHK53FTGfJEdcbiv95STOin9lsQamL9JBUNTY4EEe2OXRa8GaVa3QSl6OLobpwuYUGCWi8xXHKBHkPflINM5mY3/fQQlcPwHaJWEMSwBfx+kJJOQPKRcmp8RyzclQVe7Hp6EeEsI8F4TzYyiLUjrciPw/9YwWBxNdkZmO8MBbAvig29anHUpDNG+dda1FZeWfMdk601s3tYnOnDy5Lhv5n0gHU6q5wllUEQN50Xn6y1kMwewZnXdCOvcuDAxWo122uZA7Ev+Xk8yDpcUPmWEdfvcF6nCEB5OzGWtcq9w7Ij3+i+y1QfP1D8dVv4xBHhGG9dvLIwJLOZYhrwf0E69IQU0OMwDzFvPVVj3kiQno6OAONhiXeODpklul72LF1g8J1ns95iamFLQjYvm8wceM6F//6jQwe8OHOC3lohGkdWQHK+EQEqcGsd8bkMlRwO5IMCXQzvyKJI3LISHFnhVrNYH3zXqYCPiXeXGk5TsSQpy9+jBrgN2kQBIKdRcLliAqKaEzBxuoQQHi9ko2ZE1O7NdryDh8llEtZFmpFrDUjBOwQ44Xxb4zZZy4sQtu11eS/p4=
+    secure: 
   file_glob: true
   file: dist/CatroModulo-*-*.zip
   skip_cleanup: true  # Don't remove dist/ before uploading files
