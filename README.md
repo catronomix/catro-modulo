@@ -1,11 +1,11 @@
 
 # Catro/Modulo modules for VCV Rack
 
-## CM 0.6.6 has been released, please see release notes: <br>https://github.com/catronomix/catro-modulo/releases/tag/0.6.6 <br> 
+### CM 0.6.6 has been released, please see release notes: <br>https://github.com/catronomix/catro-modulo/releases/tag/0.6.6
 
 ![screenshot1](https://github.com/catronomix/catro-modulo/blob/master/CM066.PNG?raw=true)
 
-Full manual (old version, update will follow): https://github.com/catronomix/catro-modulo/blob/master/CM-manual-v0.6.4.pdf
+Full manual (old version, update will follow): <br> https://github.com/catronomix/catro-modulo/blob/master/CM-manual-v0.6.4.pdf
 
 CM-1: 8xlfo <br>
 8 LFOs that blend between sine, square, saw and triangle waves
@@ -56,5 +56,5 @@ There are also buttons and trigger inputs to capture the current state and play 
 
 &nbsp;
 
-##The next update will be 1.0, which will be simply 0.6.6 ported to Rack v1 plugin format.
-Additional modules (bitCrawl, bitShift and OctoLove) will have to wait untill that is finished.
+## The next update will be 1.0, which will be simply 0.6.6 ported to Rack v1 plugin format.
+### Additional modules (bitCrawl, bitShift and OctoLove) will have to wait untill that is finished.
