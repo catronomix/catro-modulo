@@ -204,4 +204,4 @@ struct CM8ModuleWidget : ModuleWidget {
 // author name for categorization per plugin, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM8Module = Model::create<CM8Module, CM8ModuleWidget>("CatroModulo", "CatroModulo_CM-8", "C/M8 : aAvsBb", LOGIC_TAG);
+Model *modelCM8Module = Model::create<CM8Module, CM8ModuleWidget>("CatroModulo", "CatroModulo_CM-8", "aAvsBb", LOGIC_TAG);

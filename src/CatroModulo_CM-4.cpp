@@ -116,4 +116,4 @@ struct CM4ModuleWidget : ModuleWidget {
 // author name for categorization per plugin, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM4Module = Model::create<CM4Module, CM4ModuleWidget>("CatroModulo", "CatroModulo_CM-4", "C/M4 : vcClk", CLOCK_TAG);
+Model *modelCM4Module = Model::create<CM4Module, CM4ModuleWidget>("CatroModulo", "CatroModulo_CM-4", "vcClk", CLOCK_TAG);

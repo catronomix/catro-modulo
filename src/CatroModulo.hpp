@@ -421,8 +421,8 @@ struct CM_Recorder {
 		if (randomTrigger.process(dotry)){
 			for (int i = 0; i < 8; i++){
 				for (int j = 0; j < 8; j++) {
-					rand(); rand(); //call random twice to get more random
-					store[i][j] = ((double) rand() / (RAND_MAX)); 
+					// rand(); rand(); //call random twice to get more random // might be too slow... 
+					store[i][j] = 2.0 * ((double) rand() / (RAND_MAX)) - 1.0; 
 				}
 			}
 			reset();

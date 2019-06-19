@@ -168,4 +168,4 @@ struct CM9ModuleWidget : ModuleWidget {
 // author name for categorization per plugin, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM9Module = Model::create<CM9Module, CM9ModuleWidget>("CatroModulo", "CatroModulo_CM-9", "C/M9 : 1-8-1", SWITCH_TAG);
+Model *modelCM9Module = Model::create<CM9Module, CM9ModuleWidget>("CatroModulo", "CatroModulo_CM-9", "1-8-1", SWITCH_TAG);

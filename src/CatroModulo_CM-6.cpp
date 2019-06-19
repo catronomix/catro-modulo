@@ -37,4 +37,4 @@ struct CM6ModuleWidget : ModuleWidget {
 	}
 };
 
-Model *modelCM6Module = Model::create<CM6Module, CM6ModuleWidget>("CatroModulo", "CatroModulo_CM-6", "C/M6 : 1hp blank", BLANK_TAG);
+Model *modelCM6Module = Model::create<CM6Module, CM6ModuleWidget>("CatroModulo", "CatroModulo_CM-6", "1hp blank", BLANK_TAG);
