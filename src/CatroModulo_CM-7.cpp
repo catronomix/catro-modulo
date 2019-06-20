@@ -45,7 +45,8 @@ struct CM7Module : Module {
 	CM_BpmClock clock4;
 	CM_BpmClock clock5;
 	
-	CM7Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
+	CM7Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 			//initialize objects
 	}
 	void step() override;
@@ -108,52 +109,53 @@ void CM7Module::step() {
 }
 
 struct CM7ModuleWidget : ModuleWidget {
-	CM7ModuleWidget(CM7Module *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-7.svg")));
+	CM7ModuleWidget(CM7Module *module) {
+		setModule(module);
+		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-7.svg")));
 
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 15, 365)));
-		addChild(Widget::create<ScrewSilver>(Vec(2, 365)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 15, 365)));
+		addChild(createWidget<ScrewSilver>(Vec(2, 365)));
 		
 		//UNIQUE ELEMENTS
-		addParam(ParamWidget::create<CM_I_def_tinybuttonL>(Vec(8.7 , 330.3), module, CM7Module::PARAM_RST, 0.0f, 1.0f, 0.0f));
-		addInput(Port::create<CM_Input_def>(Vec(17.3, 330.3), Port::INPUT, module, CM7Module::INPUT_RST));
+		addParam(createParam<CM_I_def_tinybuttonL>(Vec(8.7 , 330.3), module, CM7Module::PARAM_RST, 0.0f, 1.0f, 0.0f));
+		addInput(createPort<CM_Input_def>(Vec(17.3, 330.3), PortWidget::INPUT, module, CM7Module::INPUT_RST));
 
-		addInput(Port::create<CM_Input_bpm>(Vec(0.0 , 25.2), Port::INPUT, module, CM7Module::INPUT_BPM));
-		addInput(Port::create<CM_Input_bpm>(Vec(20.7 , 37.7), Port::INPUT, module, CM7Module::INPUT_BPM2));
+		addInput(createPort<CM_Input_bpm>(Vec(0.0 , 25.2), PortWidget::INPUT, module, CM7Module::INPUT_BPM));
+		addInput(createPort<CM_Input_bpm>(Vec(20.7 , 37.7), PortWidget::INPUT, module, CM7Module::INPUT_BPM2));
 
 		//clock outputs
-		addOutput(Port::create<CM_Output_def>(Vec(20.7 , 74.6 ), Port::OUTPUT, module, CM7Module::OUTPUT_CLKX1));
-		addOutput(Port::create<CM_Output_def>(Vec(20.7 , 111.5), Port::OUTPUT, module, CM7Module::OUTPUT_CLK_2));
-		addOutput(Port::create<CM_Output_def>(Vec(20.7 , 148.3), Port::OUTPUT, module, CM7Module::OUTPUT_CLK_3));
-		addOutput(Port::create<CM_Output_def>(Vec(20.7 , 185.2), Port::OUTPUT, module, CM7Module::OUTPUT_CLK_4));
-		addOutput(Port::create<CM_Output_def>(Vec(20.7 , 222.0), Port::OUTPUT, module, CM7Module::OUTPUT_CLK_5));
-		addOutput(Port::create<CM_Output_def>(Vec(20.7 , 258.9), Port::OUTPUT, module, CM7Module::OUTPUT_CLK_7));
-		addOutput(Port::create<CM_Output_def>(Vec(20.7 , 295.8), Port::OUTPUT, module, CM7Module::OUTPUT_CLK_9));
+		addOutput(createPort<CM_Output_def>(Vec(20.7 , 74.6 ), PortWidget::OUTPUT, module, CM7Module::OUTPUT_CLKX1));
+		addOutput(createPort<CM_Output_def>(Vec(20.7 , 111.5), PortWidget::OUTPUT, module, CM7Module::OUTPUT_CLK_2));
+		addOutput(createPort<CM_Output_def>(Vec(20.7 , 148.3), PortWidget::OUTPUT, module, CM7Module::OUTPUT_CLK_3));
+		addOutput(createPort<CM_Output_def>(Vec(20.7 , 185.2), PortWidget::OUTPUT, module, CM7Module::OUTPUT_CLK_4));
+		addOutput(createPort<CM_Output_def>(Vec(20.7 , 222.0), PortWidget::OUTPUT, module, CM7Module::OUTPUT_CLK_5));
+		addOutput(createPort<CM_Output_def>(Vec(20.7 , 258.9), PortWidget::OUTPUT, module, CM7Module::OUTPUT_CLK_7));
+		addOutput(createPort<CM_Output_def>(Vec(20.7 , 295.8), PortWidget::OUTPUT, module, CM7Module::OUTPUT_CLK_9));
 
 		//bpm cv outputs
-		addOutput(Port::create<CM_Output_bpm>(Vec(0 , 61.3) , Port::OUTPUT, module, CM7Module::OUTPUT_BPMX1));
-		addOutput(Port::create<CM_Output_bpm>(Vec(0 , 98.2) , Port::OUTPUT, module, CM7Module::OUTPUT_BPM_2));
-		addOutput(Port::create<CM_Output_bpm>(Vec(0 , 135.0), Port::OUTPUT, module, CM7Module::OUTPUT_BPM_3));
-		addOutput(Port::create<CM_Output_bpm>(Vec(0 , 171.9), Port::OUTPUT, module, CM7Module::OUTPUT_BPM_4));
-		addOutput(Port::create<CM_Output_bpm>(Vec(0 , 208.7), Port::OUTPUT, module, CM7Module::OUTPUT_BPM_5));
-		addOutput(Port::create<CM_Output_bpm>(Vec(0 , 245.6), Port::OUTPUT, module, CM7Module::OUTPUT_BPM_7));
-		addOutput(Port::create<CM_Output_bpm>(Vec(0 , 282.5), Port::OUTPUT, module, CM7Module::OUTPUT_BPM_9));
+		addOutput(createPort<CM_Output_bpm>(Vec(0 , 61.3) , PortWidget::OUTPUT, module, CM7Module::OUTPUT_BPMX1));
+		addOutput(createPort<CM_Output_bpm>(Vec(0 , 98.2) , PortWidget::OUTPUT, module, CM7Module::OUTPUT_BPM_2));
+		addOutput(createPort<CM_Output_bpm>(Vec(0 , 135.0), PortWidget::OUTPUT, module, CM7Module::OUTPUT_BPM_3));
+		addOutput(createPort<CM_Output_bpm>(Vec(0 , 171.9), PortWidget::OUTPUT, module, CM7Module::OUTPUT_BPM_4));
+		addOutput(createPort<CM_Output_bpm>(Vec(0 , 208.7), PortWidget::OUTPUT, module, CM7Module::OUTPUT_BPM_5));
+		addOutput(createPort<CM_Output_bpm>(Vec(0 , 245.6), PortWidget::OUTPUT, module, CM7Module::OUTPUT_BPM_7));
+		addOutput(createPort<CM_Output_bpm>(Vec(0 , 282.5), PortWidget::OUTPUT, module, CM7Module::OUTPUT_BPM_9));
 
 		//clock lights
-		addChild(ModuleLightWidget::create<TinyLight<GreenRedLight>>(Vec(41.0 , 74.6  + 21.0), module, CM7Module::LIGHTS_CLK));
-		addChild(ModuleLightWidget::create<TinyLight<GreenRedLight>>(Vec(41.0 , 111.5 + 21.0), module, CM7Module::LIGHTS_CLK + 2));
-		addChild(ModuleLightWidget::create<TinyLight<GreenRedLight>>(Vec(41.0 , 148.3 + 21.0), module, CM7Module::LIGHTS_CLK + 4));
-		addChild(ModuleLightWidget::create<TinyLight<GreenRedLight>>(Vec(41.0 , 185.2 + 21.0), module, CM7Module::LIGHTS_CLK + 6));
-		addChild(ModuleLightWidget::create<TinyLight<GreenRedLight>>(Vec(41.0 , 222.0 + 21.0), module, CM7Module::LIGHTS_CLK + 8));
-		addChild(ModuleLightWidget::create<TinyLight<GreenRedLight>>(Vec(41.0 , 258.9 + 21.0), module, CM7Module::LIGHTS_CLK + 10));
-		addChild(ModuleLightWidget::create<TinyLight<GreenRedLight>>(Vec(41.0 , 295.8 + 21.0), module, CM7Module::LIGHTS_CLK + 12));
+		addChild(createLight<TinyLight<GreenRedLight>>(Vec(41.0 , 74.6  + 21.0), module, CM7Module::LIGHTS_CLK));
+		addChild(createLight<TinyLight<GreenRedLight>>(Vec(41.0 , 111.5 + 21.0), module, CM7Module::LIGHTS_CLK + 2));
+		addChild(createLight<TinyLight<GreenRedLight>>(Vec(41.0 , 148.3 + 21.0), module, CM7Module::LIGHTS_CLK + 4));
+		addChild(createLight<TinyLight<GreenRedLight>>(Vec(41.0 , 185.2 + 21.0), module, CM7Module::LIGHTS_CLK + 6));
+		addChild(createLight<TinyLight<GreenRedLight>>(Vec(41.0 , 222.0 + 21.0), module, CM7Module::LIGHTS_CLK + 8));
+		addChild(createLight<TinyLight<GreenRedLight>>(Vec(41.0 , 258.9 + 21.0), module, CM7Module::LIGHTS_CLK + 10));
+		addChild(createLight<TinyLight<GreenRedLight>>(Vec(41.0 , 295.8 + 21.0), module, CM7Module::LIGHTS_CLK + 12));
 	
 	}
 };
 
 
 // Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
+// author name for categorization per pluginInstance, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM7Module = Model::create<CM7Module, CM7ModuleWidget>("CatroModulo", "CatroModulo_CM-7", "vcClk--", CLOCK_TAG);
+Model *modelCM7Module = createModel<CM7Module, CM7ModuleWidget>("CatroModulo_CM-7");

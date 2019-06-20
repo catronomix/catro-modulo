@@ -25,11 +25,12 @@ struct CM2Module : Module {
 	};
 	int overdrive = 0;
 
-	CM2Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {}
+	CM2Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);}
 	void step() override;
 
 	// For more advanced Module features, read Rack's engine.hpp header file
-	// - toJson, fromJson: serialization of internal data
+	// - dataToJson, dataFromJson: serialization of internal data
 	// - onSampleRateChange: event triggered by a change of sample rate
 	// - onReset, onRandomize, onCreate, onDelete: implements special behavior when user clicks these from the context menu
 };
@@ -65,84 +66,85 @@ void CM2Module::step() {
 }
 
 struct CM2ModuleWidget : ModuleWidget {
-	CM2ModuleWidget(CM2Module *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-2.svg")));
+	CM2ModuleWidget(CM2Module *module) {
+		setModule(module);
+		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-2.svg")));
 
-	addChild(Widget::create<ScrewSilver>(Vec(15, 0)));
-	addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 30, 0)));
-	addChild(Widget::create<ScrewSilver>(Vec(15, 365)));
-	addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 30, 365)));
+	addChild(createWidget<ScrewSilver>(Vec(15, 0)));
+	addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 0)));
+	addChild(createWidget<ScrewSilver>(Vec(15, 365)));
+	addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
 	//grid
 	const float gridrowjacks[8] = {38.4, 77.2, 116.0, 154.7, 193.5, 232.3, 271.0, 309.8};
 
 	//ATN knobs
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[0] - 16.5), module, CM2Module::PARAMS_ATN + 0, -1.0f, 1.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[1] - 16.5), module, CM2Module::PARAMS_ATN + 1, -1.0f, 1.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[2] - 16.5), module, CM2Module::PARAMS_ATN + 2, -1.0f, 1.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[3] - 16.5), module, CM2Module::PARAMS_ATN + 3, -1.0f, 1.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[4] - 16.5), module, CM2Module::PARAMS_ATN + 4, -1.0f, 1.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[5] - 16.5), module, CM2Module::PARAMS_ATN + 5, -1.0f, 1.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[6] - 16.5), module, CM2Module::PARAMS_ATN + 6, -1.0f, 1.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[7] - 16.5), module, CM2Module::PARAMS_ATN + 7, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[0] - 16.5), module, CM2Module::PARAMS_ATN + 0, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[1] - 16.5), module, CM2Module::PARAMS_ATN + 1, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[2] - 16.5), module, CM2Module::PARAMS_ATN + 2, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[3] - 16.5), module, CM2Module::PARAMS_ATN + 3, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[4] - 16.5), module, CM2Module::PARAMS_ATN + 4, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[5] - 16.5), module, CM2Module::PARAMS_ATN + 5, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[6] - 16.5), module, CM2Module::PARAMS_ATN + 6, -1.0f, 1.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_attn>(Vec(49.0, gridrowjacks[7] - 16.5), module, CM2Module::PARAMS_ATN + 7, -1.0f, 1.0f, 0.0f));
 
 	//ATN CV
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[0] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 0));
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[1] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 1));
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[2] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 2));
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[3] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 3));
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[4] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 4));
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[5] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 5));
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[6] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 6));
-	addInput(Port::create<CM_Input_small>(Vec(32.0, gridrowjacks[7] + 3.4), Port::INPUT, module, CM2Module::INPUTS_ATN + 7));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[0] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 0));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[1] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 1));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[2] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 2));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[3] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 3));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[4] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 4));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[5] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 5));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[6] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 6));
+	addInput(createPort<CM_Input_small>(Vec(32.0, gridrowjacks[7] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_ATN + 7));
 
 	//OFFSET knobs
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[0] - 16.5), module, CM2Module::PARAMS_OFF + 0, -5.0f, 5.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[1] - 16.5), module, CM2Module::PARAMS_OFF + 1, -5.0f, 5.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[2] - 16.5), module, CM2Module::PARAMS_OFF + 2, -5.0f, 5.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[3] - 16.5), module, CM2Module::PARAMS_OFF + 3, -5.0f, 5.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[4] - 16.5), module, CM2Module::PARAMS_OFF + 4, -5.0f, 5.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[5] - 16.5), module, CM2Module::PARAMS_OFF + 5, -5.0f, 5.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[6] - 16.5), module, CM2Module::PARAMS_OFF + 6, -5.0f, 5.0f, 0.0f));
-	addParam(ParamWidget::create<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[7] - 16.5), module, CM2Module::PARAMS_OFF + 7, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[0] - 16.5), module, CM2Module::PARAMS_OFF + 0, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[1] - 16.5), module, CM2Module::PARAMS_OFF + 1, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[2] - 16.5), module, CM2Module::PARAMS_OFF + 2, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[3] - 16.5), module, CM2Module::PARAMS_OFF + 3, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[4] - 16.5), module, CM2Module::PARAMS_OFF + 4, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[5] - 16.5), module, CM2Module::PARAMS_OFF + 5, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[6] - 16.5), module, CM2Module::PARAMS_OFF + 6, -5.0f, 5.0f, 0.0f));
+	addParam(createParam<CM_Knob_big_offset>(Vec(98.5, gridrowjacks[7] - 16.5), module, CM2Module::PARAMS_OFF + 7, -5.0f, 5.0f, 0.0f));
 
 	//OFFSET CV
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[0] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 0));
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[1] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 1));
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[2] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 2));
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[3] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 3));
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[4] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 4));
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[5] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 5));
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[6] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 6));
-	addInput(Port::create<CM_Input_small>(Vec(81.3, gridrowjacks[7] + 3.4), Port::INPUT, module, CM2Module::INPUTS_OFF + 7));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[0] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 0));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[1] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 1));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[2] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 2));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[3] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 3));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[4] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 4));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[5] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 5));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[6] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 6));
+	addInput(createPort<CM_Input_small>(Vec(81.3, gridrowjacks[7] + 3.4), PortWidget::INPUT, module, CM2Module::INPUTS_OFF + 7));
 
 	//Signal IN
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[0]), Port::INPUT, module, CM2Module::INPUTS_IN + 0));
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[1]), Port::INPUT, module, CM2Module::INPUTS_IN + 1));
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[2]), Port::INPUT, module, CM2Module::INPUTS_IN + 2));
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[3]), Port::INPUT, module, CM2Module::INPUTS_IN + 3));
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[4]), Port::INPUT, module, CM2Module::INPUTS_IN + 4));
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[5]), Port::INPUT, module, CM2Module::INPUTS_IN + 5));
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[6]), Port::INPUT, module, CM2Module::INPUTS_IN + 6));
-	addInput(Port::create<CM_Input_def>(Vec(5.0, gridrowjacks[7]), Port::INPUT, module, CM2Module::INPUTS_IN + 7));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[0]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 0));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[1]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 1));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[2]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 2));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[3]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 3));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[4]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 4));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[5]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 5));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[6]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 6));
+	addInput(createPort<CM_Input_def>(Vec(5.0, gridrowjacks[7]), PortWidget::INPUT, module, CM2Module::INPUTS_IN + 7));
 
 	//Signal OUT
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[0]), Port::OUTPUT, module, 0));
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[1]), Port::OUTPUT, module, 1));
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[2]), Port::OUTPUT, module, 2));
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[3]), Port::OUTPUT, module, 3));
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[4]), Port::OUTPUT, module, 4));
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[5]), Port::OUTPUT, module, 5));
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[6]), Port::OUTPUT, module, 6));
-	addOutput(Port::create<CM_Output_def>(Vec(134.6, gridrowjacks[7]), Port::OUTPUT, module, 7));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[0]), PortWidget::OUTPUT, module, 0));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[1]), PortWidget::OUTPUT, module, 1));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[2]), PortWidget::OUTPUT, module, 2));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[3]), PortWidget::OUTPUT, module, 3));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[4]), PortWidget::OUTPUT, module, 4));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[5]), PortWidget::OUTPUT, module, 5));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[6]), PortWidget::OUTPUT, module, 6));
+	addOutput(createPort<CM_Output_def>(Vec(134.6, gridrowjacks[7]), PortWidget::OUTPUT, module, 7));
 
-	addOutput(Port::create<CM_Output_small>(Vec(98.1, 336.3), Port::OUTPUT, module, 8));
-	addParam(ParamWidget::create<CM_Switch_small>(Vec(3.0, 339.4), module, CM2Module::PARAMS_X2, 1.0f, 2.0f, 1.0f));
+	addOutput(createPort<CM_Output_small>(Vec(98.1, 336.3), PortWidget::OUTPUT, module, 8));
+	addParam(createParam<CM_Switch_small>(Vec(3.0, 339.4), module, CM2Module::PARAMS_X2, 1.0f, 2.0f, 1.0f));
 	}
 };
 
 
 // Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
+// author name for categorization per pluginInstance, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM2Module = Model::create<CM2Module, CM2ModuleWidget>("CatroModulo", "CatroModulo_CM-2", "8xatn", ATTENUATOR_TAG);
+Model *modelCM2Module = createModel<CM2Module, CM2ModuleWidget>("CatroModulo_CM-2");

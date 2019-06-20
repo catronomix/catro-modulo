@@ -38,7 +38,8 @@ struct CM4Module : Module {
     //SchmittTrigger recordTrigger[16];
     CM_BpmClock bpmclock;
 	
-	CM4Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
+	CM4Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 			//initialize objects
 	}
 	void step() override;
@@ -72,40 +73,43 @@ void CM4Module::step() {
 
 struct CM4ModuleWidget : ModuleWidget {
 
-	CM4ModuleWidget(CM4Module *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-4.svg")));
+	CM4ModuleWidget(CM4Module *module) {
+		setModule(module);
+		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-4.svg")));
 
-		//addChild(Widget::create<ScrewSilver>(Vec(30, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 16, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(5, 365)));
-		// addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 60, 365)));
+		//addChild(createWidget<ScrewSilver>(Vec(30, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 16, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(5, 365)));
+		// addChild(createWidget<ScrewSilver>(Vec(box.size.x - 60, 365)));
 
 		//UNIQUE ELEMENTS
-		addParam(ParamWidget::create<CM_Knob_huge_red_os>(Vec(3.6 , 56.0), module, CM4Module::PARAM_BPM, 0.0f, 6.0, 0.0f));
-		addParam(ParamWidget::create<CM_Switch_small_3>(Vec(7.0, 43.0), module, CM4Module::PARAM_SNAP, 0.0f, 2.0f, 1.0f));
+		addParam(createParam<CM_Knob_huge_red_os>(Vec(3.6 , 56.0), module, CM4Module::PARAM_BPM, 0.0f, 6.0, 0.0f));
+		addParam(createParam<CM_Switch_small_3>(Vec(7.0, 43.0), module, CM4Module::PARAM_SNAP, 0.0f, 2.0f, 1.0f));
 
-		addInput(Port::create<CM_Input_bpm>(Vec(7.0 , 126.3), Port::INPUT, module, CM4Module::INPUT_BPM1));
-		addInput(Port::create<CM_Input_bpm>(Vec(7.0 , 169.1), Port::INPUT, module, CM4Module::INPUT_BPM2));
+		addInput(createPort<CM_Input_bpm>(Vec(7.0 , 126.3), PortWidget::INPUT, module, CM4Module::INPUT_BPM1));
+		addInput(createPort<CM_Input_bpm>(Vec(7.0 , 169.1), PortWidget::INPUT, module, CM4Module::INPUT_BPM2));
 
-		addOutput(Port::create<CM_Output_bpm>(Vec(44.4 , 126.3), Port::OUTPUT, module, CM4Module::OUTPUT_BPM1));
-		addOutput(Port::create<CM_Output_bpm>(Vec(44.4 , 169.1), Port::OUTPUT, module, CM4Module::OUTPUT_BPM2));
+		addOutput(createPort<CM_Output_bpm>(Vec(44.4 , 126.3), PortWidget::OUTPUT, module, CM4Module::OUTPUT_BPM1));
+		addOutput(createPort<CM_Output_bpm>(Vec(44.4 , 169.1), PortWidget::OUTPUT, module, CM4Module::OUTPUT_BPM2));
 
-		addOutput(Port::create<CM_Output_bpm>(Vec(7.0 , 212.0), Port::OUTPUT, module, CM4Module::OUTPUT_D2));
-		addOutput(Port::create<CM_Output_bpm>(Vec(44.4 , 212.0), Port::OUTPUT, module, CM4Module::OUTPUT_X2));
+		addOutput(createPort<CM_Output_bpm>(Vec(7.0 , 212.0), PortWidget::OUTPUT, module, CM4Module::OUTPUT_D2));
+		addOutput(createPort<CM_Output_bpm>(Vec(44.4 , 212.0), PortWidget::OUTPUT, module, CM4Module::OUTPUT_X2));
 
-		addOutput(Port::create<CM_Output_def>(Vec(26.1 , 293.9), Port::OUTPUT, module, CM4Module::OUTPUT_CLK));
-		addOutput(Port::create<CM_Output_def>(Vec(3.5 , 326.5), Port::OUTPUT, module, CM4Module::OUTPUT_CLKD2));
-		addOutput(Port::create<CM_Output_def>(Vec(48.1 , 326.5), Port::OUTPUT, module, CM4Module::OUTPUT_CLKX2));
+		addOutput(createPort<CM_Output_def>(Vec(26.1 , 293.9), PortWidget::OUTPUT, module, CM4Module::OUTPUT_CLK));
+		addOutput(createPort<CM_Output_def>(Vec(3.5 , 326.5), PortWidget::OUTPUT, module, CM4Module::OUTPUT_CLKD2));
+		addOutput(createPort<CM_Output_def>(Vec(48.1 , 326.5), PortWidget::OUTPUT, module, CM4Module::OUTPUT_CLKX2));
 
-		addInput(Port::create<CM_Input_small>(Vec(6.2 , 251.8), Port::INPUT, module, CM4Module::INPUT_RST));
-		addParam(ParamWidget::create<CM_Button_small_red>(Vec(29.4 , 251.8), module, CM4Module::PARAM_RST, 0.0f, 1.0f, 0.0f));
-		addOutput(Port::create<CM_Output_small>(Vec(52.4 , 251.8), Port::OUTPUT, module, CM4Module::OUTPUT_RST));
+		addInput(createPort<CM_Input_small>(Vec(6.2 , 251.8), PortWidget::INPUT, module, CM4Module::INPUT_RST));
+		addParam(createParam<CM_Button_small_red>(Vec(29.4 , 251.8), module, CM4Module::PARAM_RST, 0.0f, 1.0f, 0.0f));
+		addOutput(createPort<CM_Output_small>(Vec(52.4 , 251.8), PortWidget::OUTPUT, module, CM4Module::OUTPUT_RST));
 
 		//LCD display
 		NumDisplayWidget *display = new NumDisplayWidget();
 		display->box.pos = Vec(7.0 , 21.0);
 		display->box.size = Vec(61.1 , 20.4);
-		display->value = &module->bpm_display;
+		if (module){
+			display->value = &module->bpm_display;
+		}
 		addChild(display);
 		
 	}
@@ -113,7 +117,7 @@ struct CM4ModuleWidget : ModuleWidget {
 
 
 // Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
+// author name for categorization per pluginInstance, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM4Module = Model::create<CM4Module, CM4ModuleWidget>("CatroModulo", "CatroModulo_CM-4", "vcClk", CLOCK_TAG);
+Model *modelCM4Module = createModel<CM4Module, CM4ModuleWidget>("CatroModulo_CM-4");

@@ -46,7 +46,8 @@ struct CM9Module : Module {
 	float outs[8];
 	bool gatemode = 0;
 	
-	CM9Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
+	CM9Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	}
 
 	void step() override;
@@ -121,37 +122,38 @@ void CM9Module::step() {
 
 struct CM9ModuleWidget : ModuleWidget {
 
-	CM9ModuleWidget(CM9Module *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-9.svg")));
+	CM9ModuleWidget(CM9Module *module) {
+		setModule(module);
+		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-9.svg")));
 
-		//addChild(Widget::create<ScrewSilver>(Vec(30, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 16, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(5, 365)));
-		// addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 60, 365)));
+		//addChild(createWidget<ScrewSilver>(Vec(30, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 16, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(5, 365)));
+		// addChild(createWidget<ScrewSilver>(Vec(box.size.x - 60, 365)));
 
 		//widget items
-        addParam(ParamWidget::create<CM_Knob_big_def_tt>(Vec(7.0 , 20.2), module, CM9Module::PARAM_SEL, 0.0, 7.0, 0.0f));
+        addParam(createParam<CM_Knob_big_def_tt>(Vec(7.0 , 20.2), module, CM9Module::PARAM_SEL, 0.0, 7.0, 0.0f));
 
-		addInput(Port::create<CM_Input_small>(Vec(2.8, 65.9), Port::INPUT, module, CM9Module::INPUT_SEL));
-        addInput(Port::create<CM_Input_small>(Vec(50.2 , 30.0), Port::INPUT, module, CM9Module::INPUT_CLK));
-        addInput(Port::create<CM_Input_small>(Vec(50.2 , 60.2), Port::INPUT, module, CM9Module::INPUT_RST));
+		addInput(createPort<CM_Input_small>(Vec(2.8, 65.9), PortWidget::INPUT, module, CM9Module::INPUT_SEL));
+        addInput(createPort<CM_Input_small>(Vec(50.2 , 30.0), PortWidget::INPUT, module, CM9Module::INPUT_CLK));
+        addInput(createPort<CM_Input_small>(Vec(50.2 , 60.2), PortWidget::INPUT, module, CM9Module::INPUT_RST));
         
 
 		float a = 5.1;
 		float b = 46.4;
 		float c[8] = {107.5, 135.2, 163.0, 190.7, 218.5, 246.3, 274.0, 301.8};
 
-		addInput(Port::create<CM_Input_def>(Vec(25.7, 77.5), Port::INPUT, module, CM9Module::INPUT_1));
+		addInput(createPort<CM_Input_def>(Vec(25.7, 77.5), PortWidget::INPUT, module, CM9Module::INPUT_1));
 
 		for (int i = 0; i < 8; i++){
-        addInput(Port::create<CM_Input_def>(Vec(a, c[i]), Port::INPUT, module, CM9Module::INPUT_IN + i));
+        addInput(createPort<CM_Input_def>(Vec(a, c[i]), PortWidget::INPUT, module, CM9Module::INPUT_IN + i));
 		}
 
 		for (int i = 0; i < 8; i++){
-        addOutput(Port::create<CM_Output_def>(Vec(b , c[i] - 6.1), Port::OUTPUT, module, CM9Module::OUTPUT_OUT + i));
+        addOutput(createPort<CM_Output_def>(Vec(b , c[i] - 6.1), PortWidget::OUTPUT, module, CM9Module::OUTPUT_OUT + i));
 		}
 
-        addOutput(Port::create<CM_Output_def>(Vec(25.7 , 326.6), Port::OUTPUT, module, CM9Module::OUTPUT_1));
+        addOutput(createPort<CM_Output_def>(Vec(25.7 , 326.6), PortWidget::OUTPUT, module, CM9Module::OUTPUT_1));
 
 
 		//led selector display
@@ -165,7 +167,7 @@ struct CM9ModuleWidget : ModuleWidget {
 
 
 // Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
+// author name for categorization per pluginInstance, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM9Module = Model::create<CM9Module, CM9ModuleWidget>("CatroModulo", "CatroModulo_CM-9", "1-8-1", SWITCH_TAG);
+Model *modelCM9Module = createModel<CM9Module, CM9ModuleWidget>("CatroModulo_CM-9");

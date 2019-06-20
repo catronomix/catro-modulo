@@ -1,12 +1,12 @@
-#include "rack.hpp"
-#include "dsp/digital.hpp"
+#include "rack0.hpp"
 #include "CM_helpers.hpp"
+#include "ctime"
 
 using namespace rack;
 
 
 // Forward-declare the Plugin, defined in Template.cpp
-extern Plugin *plugin;
+extern Plugin *pluginInstance;
 
 // Forward-declare each Model, defined in each module source file
 extern Model *modelCM1Module;
@@ -25,7 +25,7 @@ struct CM_Knob_small_def : SVGKnob {
 	CM_Knob_small_def() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_small_def.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_small_def.svg")));
         shadow->opacity = 0;
         
 	}
@@ -42,7 +42,7 @@ struct CM_Knob_small_red : SVGKnob {
 	CM_Knob_small_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_small_red.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_small_red.svg")));
         shadow->opacity = 0;
         
 	}
@@ -52,7 +52,7 @@ struct CM_Knob_big_def : SVGKnob {
 	CM_Knob_big_def() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_big_def.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_big_def.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -61,7 +61,7 @@ struct CM_Knob_big_attn : SVGKnob {
 	CM_Knob_big_attn() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_big_attn.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_big_attn.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -70,7 +70,7 @@ struct CM_Knob_big_offset : SVGKnob {
 	CM_Knob_big_offset() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_big_offset.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_big_offset.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -86,7 +86,7 @@ struct CM_Knob_big_red : SVGKnob {
 	CM_Knob_big_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_big_red.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_big_red.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -95,7 +95,7 @@ struct CM_Knob_huge_red : SVGKnob {
 	CM_Knob_huge_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_huge_red.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_huge_red.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -110,21 +110,21 @@ struct CM_Knob_bigeye : SVGKnob {
 	CM_Knob_bigeye() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-knob_bigeye.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-knob_bigeye.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Pot1_small : SVGScrew {
 	CM_Pot1_small() {
-		sw->setSVG(SVG::load(assetPlugin(plugin, "res/CM-pot1_small.svg")));
+		sw->setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-pot1_small.svg")));
 		box.size = sw->box.size;
 	}
 };
 
 struct CM_Pot1_big : SVGScrew {
 	CM_Pot1_big() {
-		sw->setSVG(SVG::load(assetPlugin(plugin, "res/CM-pot1_big.svg")));
+		sw->setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-pot1_big.svg")));
 		box.size = sw->box.size;
         
 	}
@@ -132,42 +132,42 @@ struct CM_Pot1_big : SVGScrew {
 
 struct CM_Input_def : SVGPort {
 	CM_Input_def() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-input_def.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-input_def.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_I_def_tinybuttonL : SVGSwitch, MomentarySwitch {
+struct CM_I_def_tinybuttonL : SVGSwitch {
 	CM_I_def_tinybuttonL() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_def_tinybuttonL.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_def_tinybuttonL_dn.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-input_def_tinybuttonL.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-input_def_tinybuttonL_dn.svg")));
 	}
 };
 
-struct CM_I_def_tinybuttonR : SVGSwitch, MomentarySwitch {
+struct CM_I_def_tinybuttonR :SVGSwitch {
 	CM_I_def_tinybuttonR() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_def_tinybuttonR.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_def_tinybuttonR_dn.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-input_def_tinybuttonR.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-input_def_tinybuttonR_dn.svg")));
 	}
 };
 
 struct CM_Input_small : SVGPort {
 	CM_Input_small() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-input_small.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-input_small.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_I_small_tinybuttonL : SVGSwitch, MomentarySwitch {
+struct CM_I_small_tinybuttonL : SVGSwitch {
 	CM_I_small_tinybuttonL() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_small_tinybuttonL.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-input_small_tinybuttonL_dn.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-input_small_tinybuttonL.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-input_small_tinybuttonL_dn.svg")));
 	}
 };
 
 struct CM_Input_bpm : SVGPort {
 	CM_Input_bpm() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-input_bpm.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-input_bpm.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -175,57 +175,57 @@ struct CM_Input_bpm : SVGPort {
 
 struct CM_Output_def : SVGPort {
 	CM_Output_def() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_def.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-output_def.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Output_def_dark : SVGPort {
 	CM_Output_def_dark() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_def)dark.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-output_def)dark.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Output_small : SVGPort {
 	CM_Output_small() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_small.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-output_small.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Output_bpm : SVGPort {
 	CM_Output_bpm() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM-output_bpm.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM-output_bpm.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_Switch_small : SVGSwitch, ToggleSwitch {
+struct CM_Switch_small : SVGSwitch {
 	CM_Switch_small() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_0.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_1.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-TS_small_0.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-TS_small_1.svg")));
 	}
 };
 
-struct CM_TryMe_button : SVGSwitch, MomentarySwitch {
+struct CM_TryMe_button : SVGSwitch {
 	CM_TryMe_button() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-tryme_button.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-tryme_button_dn.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-tryme_button.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-tryme_button_dn.svg")));
 	}
 };
 	
-struct CM_Recbutton : SVGSwitch, MomentarySwitch {
+struct CM_Recbutton : SVGSwitch {
 	CM_Recbutton() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-recbutton.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-recbutton_dn.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-recbutton.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-recbutton_dn.svg")));
 	}
 };
 
-struct CM_Button_small_red : SVGSwitch, MomentarySwitch {
+struct CM_Button_small_red : SVGSwitch {
 	CM_Button_small_red() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-button_small_red.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-button_small_red_dn.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-button_small_red.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-button_small_red_dn.svg")));
 	}
 };
 
@@ -233,16 +233,18 @@ struct CM_Slider_big_red : SVGSlider {
 	CM_Slider_big_red() {
 		minHandlePos = Vec(-4, 0);
 		maxHandlePos = Vec(58, 0);
-		setSVGs(SVG::load(assetPlugin(plugin, "res/CM-slider_big_red_bg.svg")), SVG::load(assetPlugin(plugin, "res/CM-slider_big_red.svg")));
+		setSVGs(SVG::load(assetPlugin(pluginInstance, "res/CM-slider_big_red_bg.svg")), SVG::load(assetPlugin(pluginInstance, "res/CM-slider_big_red.svg")));
+		//horizontal = true;
 	}
-	void onDragMove(EventDragMove& e) override;
+	//void onDragMove(const event::DragMove &e) override;
+
 };
 
-struct CM_Switch_small_3 : SVGSwitch, ToggleSwitch {
+struct CM_Switch_small_3 : SVGSwitch {
 	CM_Switch_small_3() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_0.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_1.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/CM-TS_small_3_2.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-TS_small_3_0.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-TS_small_3_1.svg")));
+		addFrame(SVG::load(assetPlugin(pluginInstance, "res/CM-TS_small_3_2.svg")));
 	}
 };
 
@@ -705,7 +707,7 @@ struct NumDisplayWidget : TransparentWidget {
   std::shared_ptr<Font> font;
 
 	NumDisplayWidget() {
-		font = Font::load(assetPlugin(plugin, "res/Segment7Standard.ttf"));
+		font = Font::load(assetPlugin(pluginInstance, "res/Segment7Standard.ttf"));
 	};
 
 	void draw(NVGcontext *vg) override {
@@ -747,7 +749,7 @@ struct TxtDisplayWidget : TransparentWidget {
   std::shared_ptr<Font> font;
 
 	TxtDisplayWidget() {
-		font = Font::load(assetPlugin(plugin, "res/Segment7Standard.ttf"));
+		font = Font::load(assetPlugin(pluginInstance, "res/Segment7Standard.ttf"));
 	};
 
 	void draw(NVGcontext *vg) override {
@@ -839,11 +841,11 @@ struct CM9_LedIndicator : SVGWidget {
 	float *posy;
 
 	CM9_LedIndicator() {
-		setSVG(SVG::load(assetPlugin(plugin, "res/CM9_ledinc.svg")));
+		setSVG(SVG::load(assetPlugin(pluginInstance, "res/CM9_ledinc.svg")));
 		wrap();
 	};
 
-	void draw(NVGcontext *vg) override {
+	void draw(const DrawArgs &vg) override {
 		box.pos.x = *posx;
 		box.pos.y = *posy;
 		SVGWidget::draw(vg);

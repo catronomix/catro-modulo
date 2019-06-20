@@ -64,7 +64,8 @@ struct CM8Module : Module {
    float currentA;
    float currentB;
 	
-	CM8Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
+	CM8Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 			srand(time(NULL));
 	}
 	void step() override;
@@ -147,61 +148,62 @@ void CM8Module::step() {
 
 struct CM8ModuleWidget : ModuleWidget {
 
-	CM8ModuleWidget(CM8Module *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-8.svg")));
+	CM8ModuleWidget(CM8Module *module) {
+		setModule(module);
+		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-8.svg")));
 
-		//addChild(Widget::create<ScrewSilver>(Vec(30, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 16, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(5, 365)));
-		// addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 60, 365)));
+		//addChild(createWidget<ScrewSilver>(Vec(30, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 16, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(5, 365)));
+		// addChild(createWidget<ScrewSilver>(Vec(box.size.x - 60, 365)));
 
 		//widget items
-        addParam(ParamWidget::create<CM_Knob_big_def_tt>(Vec(34.2 , 18.0), module, CM8Module::PARAM__a, -10.0, 10.0, 0.0f));
-		addParam(ParamWidget::create<CM_Knob_big_def_tt>(Vec(5.4 , 58.0), module, CM8Module::PARAM__b, -10.0, 10.0, 0.0f));
+        addParam(createParam<CM_Knob_big_def_tt>(Vec(34.2 , 18.0), module, CM8Module::PARAM__a, -10.0, 10.0, 0.0f));
+		addParam(createParam<CM_Knob_big_def_tt>(Vec(5.4 , 58.0), module, CM8Module::PARAM__b, -10.0, 10.0, 0.0f));
 
-		addInput(Port::create<CM_Input_small>(Vec(8.4 , 18.0), Port::INPUT, module, CM8Module::INPUT__a));
-        addInput(Port::create<CM_Input_small>(Vec(50.0 , 57.1), Port::INPUT, module, CM8Module::INPUT__b));
+		addInput(createPort<CM_Input_small>(Vec(8.4 , 18.0), PortWidget::INPUT, module, CM8Module::INPUT__a));
+        addInput(createPort<CM_Input_small>(Vec(50.0 , 57.1), PortWidget::INPUT, module, CM8Module::INPUT__b));
 
-        addOutput(Port::create<CM_Output_small>(Vec(8.4 , 39.1), Port::OUTPUT, module, CM8Module::OUTPUT__a));
-        addOutput(Port::create<CM_Output_small>(Vec(50.0 , 78.3), Port::OUTPUT, module, CM8Module::OUTPUT__b));
+        addOutput(createPort<CM_Output_small>(Vec(8.4 , 39.1), PortWidget::OUTPUT, module, CM8Module::OUTPUT__a));
+        addOutput(createPort<CM_Output_small>(Vec(50.0 , 78.3), PortWidget::OUTPUT, module, CM8Module::OUTPUT__b));
 
-		addParam(ParamWidget::create<CM_Switch_small_3>(Vec(16.4, 103.3), module, CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f));
-		addInput(Port::create<CM_Input_small>(Vec(54.0 , 112.7), Port::INPUT, module, CM8Module::INPUT_SNH));
+		addParam(createParam<CM_Switch_small_3>(Vec(16.4, 103.3), module, CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f));
+		addInput(createPort<CM_Input_small>(Vec(54.0 , 112.7), PortWidget::INPUT, module, CM8Module::INPUT_SNH));
 
 		float a = 5.4;
 		float b = 46.0;
 		float c[8] = {138.8, 166.0, 193.2, 221.9, 249.1, 277.1, 304.3, 331.5};
 
-		addInput(Port::create<CM_Input_def>(Vec(a, c[0]), Port::INPUT, module, CM8Module::INPUT_A));
-		addInput(Port::create<CM_Input_def>(Vec(b, c[0]), Port::INPUT, module, CM8Module::INPUT_B));
+		addInput(createPort<CM_Input_def>(Vec(a, c[0]), PortWidget::INPUT, module, CM8Module::INPUT_A));
+		addInput(createPort<CM_Input_def>(Vec(b, c[0]), PortWidget::INPUT, module, CM8Module::INPUT_B));
 
-		addOutput(Port::create<CM_Output_def>(Vec(a , c[1]), Port::OUTPUT, module, CM8Module::OUTPUT_ALTB));
-		addOutput(Port::create<CM_Output_def>(Vec(b , c[1]), Port::OUTPUT, module, CM8Module::OUTPUT_BLTA));
+		addOutput(createPort<CM_Output_def>(Vec(a , c[1]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ALTB));
+		addOutput(createPort<CM_Output_def>(Vec(b , c[1]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BLTA));
 
-		addOutput(Port::create<CM_Output_def>(Vec(a , c[2]), Port::OUTPUT, module, CM8Module::OUTPUT_AISB));
-		addOutput(Port::create<CM_Output_def>(Vec(b , c[2]), Port::OUTPUT, module, CM8Module::OUTPUT_ANTB));
+		addOutput(createPort<CM_Output_def>(Vec(a , c[2]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_AISB));
+		addOutput(createPort<CM_Output_def>(Vec(b , c[2]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ANTB));
 
-		addOutput(Port::create<CM_Output_def>(Vec(a , c[3]), Port::OUTPUT, module, CM8Module::OUTPUT_ACLM));
-		addOutput(Port::create<CM_Output_def>(Vec(b , c[3]), Port::OUTPUT, module, CM8Module::OUTPUT_BCLM));
+		addOutput(createPort<CM_Output_def>(Vec(a , c[3]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ACLM));
+		addOutput(createPort<CM_Output_def>(Vec(b , c[3]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BCLM));
 
-		addOutput(Port::create<CM_Output_def>(Vec(a , c[4]), Port::OUTPUT, module, CM8Module::OUTPUT_AFLD));
-		addOutput(Port::create<CM_Output_def>(Vec(b , c[4]), Port::OUTPUT, module, CM8Module::OUTPUT_BFLD));
+		addOutput(createPort<CM_Output_def>(Vec(a , c[4]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_AFLD));
+		addOutput(createPort<CM_Output_def>(Vec(b , c[4]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BFLD));
 
-		addOutput(Port::create<CM_Output_def>(Vec(a , c[5]), Port::OUTPUT, module, CM8Module::OUTPUT_ALO));
-		addOutput(Port::create<CM_Output_def>(Vec(b , c[5]), Port::OUTPUT, module, CM8Module::OUTPUT_BLO));
+		addOutput(createPort<CM_Output_def>(Vec(a , c[5]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ALO));
+		addOutput(createPort<CM_Output_def>(Vec(b , c[5]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BLO));
 
-		addOutput(Port::create<CM_Output_def>(Vec(a , c[6]), Port::OUTPUT, module, CM8Module::OUTPUT_AHI));
-		addOutput(Port::create<CM_Output_def>(Vec(b , c[6]), Port::OUTPUT, module, CM8Module::OUTPUT_BHI));
+		addOutput(createPort<CM_Output_def>(Vec(a , c[6]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_AHI));
+		addOutput(createPort<CM_Output_def>(Vec(b , c[6]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BHI));
 
-		addOutput(Port::create<CM_Output_def>(Vec(a , c[7]), Port::OUTPUT, module, CM8Module::OUTPUT_ARNG));
-		addOutput(Port::create<CM_Output_def>(Vec(b , c[7]), Port::OUTPUT, module, CM8Module::OUTPUT_BRNG));
+		addOutput(createPort<CM_Output_def>(Vec(a , c[7]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ARNG));
+		addOutput(createPort<CM_Output_def>(Vec(b , c[7]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BRNG));
 
 	}
 };
 
 
 // Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
+// author name for categorization per pluginInstance, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM8Module = Model::create<CM8Module, CM8ModuleWidget>("CatroModulo", "CatroModulo_CM-8", "aAvsBb", LOGIC_TAG);
+Model *modelCM8Module = createModel<CM8Module, CM8ModuleWidget>("CatroModulo_CM-8");

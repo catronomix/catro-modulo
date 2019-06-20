@@ -37,7 +37,8 @@ struct CM10Module : Module {
     bool rec[2] = {};
     bool play[2] = {};
     	
-	CM10Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
+	CM10Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	}
 
 	void step() override;
@@ -75,56 +76,61 @@ void CM10Module::step() {
 
 struct CM10ModuleWidget : ModuleWidget {
 
-	CM10ModuleWidget(CM10Module *module) : ModuleWidget(module) {
+	CM10ModuleWidget(CM10Module *module) {
+		setModule(module);
         //positionings
         float c1 = 3.2;
         float c2 = 33.2;
         float rr[6] = {50.7, 102.2, 163.1, 219.6, 271.1, 331.9}; //update positions
 
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-10.svg")));
+		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-10.svg")));
 
-		//addChild(Widget::create<ScrewSilver>(Vec(30, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 16, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(5, 365)));
-		// addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 60, 365)));
+		//addChild(createWidget<ScrewSilver>(Vec(30, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 16, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(5, 365)));
+		// addChild(createWidget<ScrewSilver>(Vec(box.size.x - 60, 365)));
 
         //Step 1
-        addParam(ParamWidget::create<CM_Button_small_red>(Vec(4.7 , 130.1), module, CM10Module::PARAM_REC, 0.0, 1.0, 0.0f));
-        addParam(ParamWidget::create<CM_Button_small_red>(Vec(34.7 , 130.1), module, CM10Module::PARAM_PLAY, 0.0, 1.0, 0.0f));
-        addInput(Port::create<CM_Input_def>(Vec(c1, rr[0]), Port::INPUT, module, CM10Module::INPUT_IN));
-        addInput(Port::create<CM_Input_def>(Vec(c1, rr[1]), Port::INPUT, module, CM10Module::INPUT_STEP));
-        addInput(Port::create<CM_Input_small>(Vec(c1, rr[2]), Port::INPUT, module, CM10Module::INPUT_REC));
-        addInput(Port::create<CM_Input_small>(Vec(c2, rr[2]), Port::INPUT, module, CM10Module::INPUT_PLAY));
+        addParam(createParam<CM_Button_small_red>(Vec(4.7 , 130.1), module, CM10Module::PARAM_REC, 0.0, 1.0, 0.0f));
+        addParam(createParam<CM_Button_small_red>(Vec(34.7 , 130.1), module, CM10Module::PARAM_PLAY, 0.0, 1.0, 0.0f));
+        addInput(createPort<CM_Input_def>(Vec(c1, rr[0]), PortWidget::INPUT, module, CM10Module::INPUT_IN));
+        addInput(createPort<CM_Input_def>(Vec(c1, rr[1]), PortWidget::INPUT, module, CM10Module::INPUT_STEP));
+        addInput(createPort<CM_Input_small>(Vec(c1, rr[2]), PortWidget::INPUT, module, CM10Module::INPUT_REC));
+        addInput(createPort<CM_Input_small>(Vec(c2, rr[2]), PortWidget::INPUT, module, CM10Module::INPUT_PLAY));
 
-        addOutput(Port::create<CM_Output_def>(Vec(c2 , rr[0]), Port::OUTPUT, module, CM10Module::OUTPUT_OUT));
-        addOutput(Port::create<CM_Output_def>(Vec(c2 , rr[1]), Port::OUTPUT, module, CM10Module::OUTPUT_STEP));
-        addOutput(Port::create<CM_Output_def>(Vec(18.2 , 72.6 ), Port::OUTPUT, module, CM10Module::OUTPUT_CURRENT));
+        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[0]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_OUT));
+        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[1]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_STEP));
+        addOutput(createPort<CM_Output_def>(Vec(18.2 , 72.6 ), PortWidget::OUTPUT, module, CM10Module::OUTPUT_CURRENT));
 
 
         //LCD displays
 		BigLedIndicator *display1 = new BigLedIndicator();
 		display1->box.pos = Vec(5.3 , 22.1);
 		display1->box.size = Vec(49.6 , 19.0);
-		display1->lit = &module->lit[0];
+        if (module){
+		    display1->lit = &module->lit[0];
+        }
 		addChild(display1);
 
         //Step 2
-        addParam(ParamWidget::create<CM_Button_small_red>(Vec(4.7 , 300.4), module, CM10Module::PARAM_REC + 1, 0.0, 1.0, 0.0f));
-        addParam(ParamWidget::create<CM_Button_small_red>(Vec(34.7 , 300.4), module, CM10Module::PARAM_PLAY + 1, 0.0, 1.0, 0.0f));
-        addInput(Port::create<CM_Input_def>(Vec(c1, rr[3]), Port::INPUT, module, CM10Module::INPUT_IN + 1));
-        addInput(Port::create<CM_Input_def>(Vec(c1, rr[4]), Port::INPUT, module, CM10Module::INPUT_STEP + 1));
-        addInput(Port::create<CM_Input_small>(Vec(c1, rr[5]), Port::INPUT, module, CM10Module::INPUT_REC + 1));
-        addInput(Port::create<CM_Input_small>(Vec(c2, rr[5]), Port::INPUT, module, CM10Module::INPUT_PLAY + 1));
+        addParam(createParam<CM_Button_small_red>(Vec(4.7 , 300.4), module, CM10Module::PARAM_REC + 1, 0.0, 1.0, 0.0f));
+        addParam(createParam<CM_Button_small_red>(Vec(34.7 , 300.4), module, CM10Module::PARAM_PLAY + 1, 0.0, 1.0, 0.0f));
+        addInput(createPort<CM_Input_def>(Vec(c1, rr[3]), PortWidget::INPUT, module, CM10Module::INPUT_IN + 1));
+        addInput(createPort<CM_Input_def>(Vec(c1, rr[4]), PortWidget::INPUT, module, CM10Module::INPUT_STEP + 1));
+        addInput(createPort<CM_Input_small>(Vec(c1, rr[5]), PortWidget::INPUT, module, CM10Module::INPUT_REC + 1));
+        addInput(createPort<CM_Input_small>(Vec(c2, rr[5]), PortWidget::INPUT, module, CM10Module::INPUT_PLAY + 1));
 
-        addOutput(Port::create<CM_Output_def>(Vec(c2 , rr[3]), Port::OUTPUT, module, CM10Module::OUTPUT_OUT + 1));
-        addOutput(Port::create<CM_Output_def>(Vec(c2 , rr[4]), Port::OUTPUT, module, CM10Module::OUTPUT_STEP + 1));
-        addOutput(Port::create<CM_Output_def>(Vec(18.2 , 241.4 ), Port::OUTPUT, module, CM10Module::OUTPUT_CURRENT)); //update pos
+        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[3]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_OUT + 1));
+        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[4]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_STEP + 1));
+        addOutput(createPort<CM_Output_def>(Vec(18.2 , 241.4 ), PortWidget::OUTPUT, module, CM10Module::OUTPUT_CURRENT)); //update pos
 
         //LCD displays
 		BigLedIndicator *display2 = new BigLedIndicator();
 		display2->box.pos = Vec(5.3 , 190.9);
 		display2->box.size = Vec(49.6 , 19.0);
-		display2->lit = &module->lit[1];
+        if (module){
+		    display2->lit = &module->lit[1];
+        }
 		addChild(display2);
 
 	}
@@ -132,7 +138,7 @@ struct CM10ModuleWidget : ModuleWidget {
 
 
 // Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
+// author name for categorization per pluginInstance, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM10Module = Model::create<CM10Module, CM10ModuleWidget>("CatroModulo", "CatroModulo_CM-10", "bitStep", SAMPLE_AND_HOLD_TAG);
+Model *modelCM10Module = createModel<CM10Module, CM10ModuleWidget>("CatroModulo_CM-10");
