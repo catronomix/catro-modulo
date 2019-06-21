@@ -58,7 +58,7 @@ struct CM8Module : Module {
    float lo;
    float hi;
    int cia;
-   SchmittTrigger snhTrigger;
+   dsp::SchmittTrigger snhTrigger;
    float lastA;
    float lastB;
    float currentA;
@@ -66,57 +66,61 @@ struct CM8Module : Module {
 	
 	CM8Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		configParam(CM8Module::PARAM__a, -10.0, 10.0, 0.0f, "");
+		configParam(CM8Module::PARAM__b, -10.0, 10.0, 0.0f, "");
+		configParam(CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f, "");
+
 			srand(time(NULL));
 	}
-	void step() override;
+	void process(const ProcessArgs &args) override;
 };
 
-void CM8Module::step() {
+void CM8Module::process(const ProcessArgs &args) {
 	// set mode
-	cia = params[PARAM_CIA].value;
+	cia = params[PARAM_CIA].getValue();
 
 
 	//set limits
 		
 		if (cia == 0){
-			lo = (inputs[INPUT__a].active) ? (inputs[INPUT__a].value * 0.1) * params[PARAM__a].value : params[PARAM__a].value;
-			hi = (inputs[INPUT__b].active) ? (inputs[INPUT__b].value * 0.1) * params[PARAM__b].value : params[PARAM__b].value;
+			lo = (inputs[INPUT__a].isConnected()) ? (inputs[INPUT__a].getVoltage() * 0.1) * params[PARAM__a].getValue() : params[PARAM__a].getValue();
+			hi = (inputs[INPUT__b].isConnected()) ? (inputs[INPUT__b].getVoltage() * 0.1) * params[PARAM__b].getValue() : params[PARAM__b].getValue();
 			if (lo > hi){
 				hi = (lo + hi) * 0.5;
 				lo = hi;
 			}
-			outputs[OUTPUT__a].value = lo;
-			outputs[OUTPUT__b].value = hi;
+			outputs[OUTPUT__a].setVoltage(lo);
+			outputs[OUTPUT__b].setVoltage(hi);
 		}
 		if (cia == 1){
-			lo = (inputs[INPUT__a].active) ? (inputs[INPUT__a].value * 0.1) * params[PARAM__a].value : params[PARAM__a].value;
-			hi = (inputs[INPUT__b].active) ? (inputs[INPUT__b].value * 0.1) * params[PARAM__b].value : params[PARAM__b].value;
-			outputs[OUTPUT__a].value = lo;
-			outputs[OUTPUT__b].value = hi;
+			lo = (inputs[INPUT__a].isConnected()) ? (inputs[INPUT__a].getVoltage() * 0.1) * params[PARAM__a].getValue() : params[PARAM__a].getValue();
+			hi = (inputs[INPUT__b].isConnected()) ? (inputs[INPUT__b].getVoltage() * 0.1) * params[PARAM__b].getValue() : params[PARAM__b].getValue();
+			outputs[OUTPUT__a].setVoltage(lo);
+			outputs[OUTPUT__b].setVoltage(hi);
 			if (lo > hi){
 			std::swap(lo, hi);
 			}
 		}
 		if (cia == 2){
-			lo = (inputs[INPUT__a].active) ? (inputs[INPUT__a].value * 0.1) * params[PARAM__a].value : params[PARAM__a].value;
-			hi = lo + ((inputs[INPUT__b].active) ? (inputs[INPUT__b].value * 0.1) * params[PARAM__b].value : params[PARAM__b].value);
-			outputs[OUTPUT__a].value = lo;
-			outputs[OUTPUT__b].value = hi;
+			lo = (inputs[INPUT__a].isConnected()) ? (inputs[INPUT__a].getVoltage() * 0.1) * params[PARAM__a].getValue() : params[PARAM__a].getValue();
+			hi = lo + ((inputs[INPUT__b].isConnected()) ? (inputs[INPUT__b].getVoltage() * 0.1) * params[PARAM__b].getValue() : params[PARAM__b].getValue());
+			outputs[OUTPUT__a].setVoltage(lo);
+			outputs[OUTPUT__b].setVoltage(hi);
 			if (lo > hi){
 			std::swap(lo, hi);
 			}
 		}
 
-	currentA = inputs[INPUT_A].value;
-	currentB = inputs[INPUT_B].value;
+	currentA = inputs[INPUT_A].getVoltage();
+	currentB = inputs[INPUT_B].getVoltage();
 
 	//handle empty inputs
-	if (! inputs[INPUT_A].active) currentA = (inputs[INPUT_B].active) ? cm_gauss(5.0, currentB) : cm_gauss(10.0);
-	if (! inputs[INPUT_B].active) currentB = (inputs[INPUT_A].active) ? cm_gauss(5.0, currentA) : cm_gauss(10.0);
+	if (! inputs[INPUT_A].isConnected()) currentA = (inputs[INPUT_B].isConnected()) ? cm_gauss(5.0, currentB) : cm_gauss(10.0);
+	if (! inputs[INPUT_B].isConnected()) currentB = (inputs[INPUT_A].isConnected()) ? cm_gauss(5.0, currentA) : cm_gauss(10.0);
 
 	//sample and hold
-	if (inputs[INPUT_SNH].active){
-		if (snhTrigger.process(inputs[INPUT_SNH].value)){
+	if (inputs[INPUT_SNH].isConnected()){
+		if (snhTrigger.process(inputs[INPUT_SNH].getVoltage())){
 			lastA = currentA;
 			lastB = currentB;
 		}
@@ -126,22 +130,22 @@ void CM8Module::step() {
 	
 
 	//A
-	outputs[OUTPUT_ALTB].value = (currentA > currentB) * 10.0;
-	outputs[OUTPUT_AISB].value = (currentA == currentB) * 10.0;
-	outputs[OUTPUT_ACLM].value = cm_clamp(currentA, lo, hi);
-	outputs[OUTPUT_AFLD].value = cm_fold(currentA, lo, hi);
-	outputs[OUTPUT_ALO].value = (currentA <= hi) * 10.0;
-	outputs[OUTPUT_AHI].value = (currentA >= lo) * 10.0;
-	outputs[OUTPUT_ARNG].value = (currentA > lo && currentA < hi) * 10.0;
+	outputs[OUTPUT_ALTB].setVoltage((currentA > currentB) * 10.0);
+	outputs[OUTPUT_AISB].setVoltage((currentA == currentB) * 10.0);
+	outputs[OUTPUT_ACLM].setVoltage(cm_clamp(currentA, lo, hi));
+	outputs[OUTPUT_AFLD].setVoltage(cm_fold(currentA, lo, hi));
+	outputs[OUTPUT_ALO].setVoltage((currentA <= hi) * 10.0);
+	outputs[OUTPUT_AHI].setVoltage((currentA >= lo) * 10.0);
+	outputs[OUTPUT_ARNG].setVoltage((currentA > lo && currentA < hi) * 10.0);
 
 	//B
-	outputs[OUTPUT_BLTA].value = (currentA < currentB) * 10.0;
-	outputs[OUTPUT_ANTB].value = !(currentA == currentB) * 10.0;
-	outputs[OUTPUT_BCLM].value = cm_clamp(currentB, lo, hi);
-	outputs[OUTPUT_BFLD].value = cm_fold(currentB, lo, hi);
-	outputs[OUTPUT_BLO].value = (currentB <= hi) * 10.0;
-	outputs[OUTPUT_BHI].value = (currentB >= lo) * 10.0;
-	outputs[OUTPUT_BRNG].value = (currentB > lo && currentB < hi) * 10.0;
+	outputs[OUTPUT_BLTA].setVoltage((currentA < currentB) * 10.0);
+	outputs[OUTPUT_ANTB].setVoltage(!(currentA == currentB) * 10.0);
+	outputs[OUTPUT_BCLM].setVoltage(cm_clamp(currentB, lo, hi));
+	outputs[OUTPUT_BFLD].setVoltage(cm_fold(currentB, lo, hi));
+	outputs[OUTPUT_BLO].setVoltage((currentB <= hi) * 10.0);
+	outputs[OUTPUT_BHI].setVoltage((currentB >= lo) * 10.0);
+	outputs[OUTPUT_BRNG].setVoltage((currentB > lo && currentB < hi) * 10.0);
 
 
 }
@@ -150,7 +154,7 @@ struct CM8ModuleWidget : ModuleWidget {
 
 	CM8ModuleWidget(CM8Module *module) {
 		setModule(module);
-		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-8.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-8.svg")));
 
 		//addChild(createWidget<ScrewSilver>(Vec(30, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 16, 0)));
@@ -158,45 +162,45 @@ struct CM8ModuleWidget : ModuleWidget {
 		// addChild(createWidget<ScrewSilver>(Vec(box.size.x - 60, 365)));
 
 		//widget items
-        addParam(createParam<CM_Knob_big_def_tt>(Vec(34.2 , 18.0), module, CM8Module::PARAM__a, -10.0, 10.0, 0.0f));
-		addParam(createParam<CM_Knob_big_def_tt>(Vec(5.4 , 58.0), module, CM8Module::PARAM__b, -10.0, 10.0, 0.0f));
+        addParam(createParam<CM_Knob_big_def_tt>(Vec(34.2 , 18.0), module, CM8Module::PARAM__a));
+		addParam(createParam<CM_Knob_big_def_tt>(Vec(5.4 , 58.0), module, CM8Module::PARAM__b));
 
-		addInput(createPort<CM_Input_small>(Vec(8.4 , 18.0), PortWidget::INPUT, module, CM8Module::INPUT__a));
-        addInput(createPort<CM_Input_small>(Vec(50.0 , 57.1), PortWidget::INPUT, module, CM8Module::INPUT__b));
+		addInput(createInput<CM_Input_small>(Vec(8.4 , 18.0), module, CM8Module::INPUT__a));
+        addInput(createInput<CM_Input_small>(Vec(50.0 , 57.1), module, CM8Module::INPUT__b));
 
-        addOutput(createPort<CM_Output_small>(Vec(8.4 , 39.1), PortWidget::OUTPUT, module, CM8Module::OUTPUT__a));
-        addOutput(createPort<CM_Output_small>(Vec(50.0 , 78.3), PortWidget::OUTPUT, module, CM8Module::OUTPUT__b));
+        addOutput(createOutput<CM_Output_small>(Vec(8.4 , 39.1), module, CM8Module::OUTPUT__a));
+        addOutput(createOutput<CM_Output_small>(Vec(50.0 , 78.3), module, CM8Module::OUTPUT__b));
 
-		addParam(createParam<CM_Switch_small_3>(Vec(16.4, 103.3), module, CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f));
-		addInput(createPort<CM_Input_small>(Vec(54.0 , 112.7), PortWidget::INPUT, module, CM8Module::INPUT_SNH));
+		addParam(createParam<CM_Switch_small_3>(Vec(16.4, 103.3), module, CM8Module::PARAM_CIA));
+		addInput(createInput<CM_Input_small>(Vec(54.0 , 112.7), module, CM8Module::INPUT_SNH));
 
 		float a = 5.4;
 		float b = 46.0;
 		float c[8] = {138.8, 166.0, 193.2, 221.9, 249.1, 277.1, 304.3, 331.5};
 
-		addInput(createPort<CM_Input_def>(Vec(a, c[0]), PortWidget::INPUT, module, CM8Module::INPUT_A));
-		addInput(createPort<CM_Input_def>(Vec(b, c[0]), PortWidget::INPUT, module, CM8Module::INPUT_B));
+		addInput(createInput<CM_Input_def>(Vec(a, c[0]), module, CM8Module::INPUT_A));
+		addInput(createInput<CM_Input_def>(Vec(b, c[0]), module, CM8Module::INPUT_B));
 
-		addOutput(createPort<CM_Output_def>(Vec(a , c[1]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ALTB));
-		addOutput(createPort<CM_Output_def>(Vec(b , c[1]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BLTA));
+		addOutput(createOutput<CM_Output_def>(Vec(a , c[1]), module, CM8Module::OUTPUT_ALTB));
+		addOutput(createOutput<CM_Output_def>(Vec(b , c[1]), module, CM8Module::OUTPUT_BLTA));
 
-		addOutput(createPort<CM_Output_def>(Vec(a , c[2]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_AISB));
-		addOutput(createPort<CM_Output_def>(Vec(b , c[2]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ANTB));
+		addOutput(createOutput<CM_Output_def>(Vec(a , c[2]), module, CM8Module::OUTPUT_AISB));
+		addOutput(createOutput<CM_Output_def>(Vec(b , c[2]), module, CM8Module::OUTPUT_ANTB));
 
-		addOutput(createPort<CM_Output_def>(Vec(a , c[3]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ACLM));
-		addOutput(createPort<CM_Output_def>(Vec(b , c[3]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BCLM));
+		addOutput(createOutput<CM_Output_def>(Vec(a , c[3]), module, CM8Module::OUTPUT_ACLM));
+		addOutput(createOutput<CM_Output_def>(Vec(b , c[3]), module, CM8Module::OUTPUT_BCLM));
 
-		addOutput(createPort<CM_Output_def>(Vec(a , c[4]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_AFLD));
-		addOutput(createPort<CM_Output_def>(Vec(b , c[4]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BFLD));
+		addOutput(createOutput<CM_Output_def>(Vec(a , c[4]), module, CM8Module::OUTPUT_AFLD));
+		addOutput(createOutput<CM_Output_def>(Vec(b , c[4]), module, CM8Module::OUTPUT_BFLD));
 
-		addOutput(createPort<CM_Output_def>(Vec(a , c[5]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ALO));
-		addOutput(createPort<CM_Output_def>(Vec(b , c[5]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BLO));
+		addOutput(createOutput<CM_Output_def>(Vec(a , c[5]), module, CM8Module::OUTPUT_ALO));
+		addOutput(createOutput<CM_Output_def>(Vec(b , c[5]), module, CM8Module::OUTPUT_BLO));
 
-		addOutput(createPort<CM_Output_def>(Vec(a , c[6]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_AHI));
-		addOutput(createPort<CM_Output_def>(Vec(b , c[6]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BHI));
+		addOutput(createOutput<CM_Output_def>(Vec(a , c[6]), module, CM8Module::OUTPUT_AHI));
+		addOutput(createOutput<CM_Output_def>(Vec(b , c[6]), module, CM8Module::OUTPUT_BHI));
 
-		addOutput(createPort<CM_Output_def>(Vec(a , c[7]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_ARNG));
-		addOutput(createPort<CM_Output_def>(Vec(b , c[7]), PortWidget::OUTPUT, module, CM8Module::OUTPUT_BRNG));
+		addOutput(createOutput<CM_Output_def>(Vec(a , c[7]), module, CM8Module::OUTPUT_ARNG));
+		addOutput(createOutput<CM_Output_def>(Vec(b , c[7]), module, CM8Module::OUTPUT_BRNG));
 
 	}
 };

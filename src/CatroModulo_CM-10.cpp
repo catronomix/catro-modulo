@@ -28,9 +28,9 @@ struct CM10Module : Module {
 	};
 
    //initializations
-	SchmittTrigger stepTrigger[2];
-    SchmittTrigger recTrigger[2];
-    SchmittTrigger playTrigger[2];
+	dsp::SchmittTrigger stepTrigger[2];
+    dsp::SchmittTrigger recTrigger[2];
+    dsp::SchmittTrigger playTrigger[2];
     bool lit[2] = {};
     bool currentin[2] = {};
     bool out[2] = {};
@@ -39,38 +39,43 @@ struct CM10Module : Module {
     	
 	CM10Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+        configParam(CM10Module::PARAM_REC, 0.0, 1.0, 0.0f, "");
+        configParam(CM10Module::PARAM_PLAY, 0.0, 1.0, 0.0f, "");
+        configParam(CM10Module::PARAM_REC + 1, 0.0, 1.0, 0.0f, "");
+        configParam(CM10Module::PARAM_PLAY + 1, 0.0, 1.0, 0.0f, "");
+
 	}
 
-	void step() override;
+	void process(const ProcessArgs &args) override;
 
 };
 
-void CM10Module::step() {
+void CM10Module::process(const ProcessArgs &args) {
     for (int i = 0; i < 2; i++){
-        if (stepTrigger[i].process(inputs[INPUT_STEP + i].value)){
+        if (stepTrigger[i].process(inputs[INPUT_STEP + i].getVoltage())){
             out[i] = currentin[i];
             if (play[i] == true){
                 currentin[i] = rec[i];
                 play[i] = false;
             }else{
-                currentin[i] = inputs[INPUT_IN + i].value;
+                currentin[i] = inputs[INPUT_IN + i].getVoltage();
             }
             
             lit[i] = currentin[i];
         }
         
-        if (recTrigger[i].process((inputs[INPUT_REC + i].value || params[PARAM_REC + i].value) * 10.0)){
+        if (recTrigger[i].process((inputs[INPUT_REC + i].getVoltage() || params[PARAM_REC + i].getValue()) * 10.0)){
             rec[i] = currentin[i];
         }
 
-        if (playTrigger[i].process((inputs[INPUT_PLAY + i].value || params[PARAM_PLAY + i].value) * 10.0)){
+        if (playTrigger[i].process((inputs[INPUT_PLAY + i].getVoltage() || params[PARAM_PLAY + i].getValue()) * 10.0)){
             play[i] = true;
         }
 
         //set outputs
-        outputs[OUTPUT_OUT + i].value = out[i] * 10.0;
-        outputs[OUTPUT_STEP + i].value = (bool)(inputs[INPUT_STEP + i].value) * 10.0;
-        outputs[OUTPUT_CURRENT + i].value = currentin[i] * 10.0;
+        outputs[OUTPUT_OUT + i].setVoltage(out[i] * 10.0);
+        outputs[OUTPUT_STEP + i].setVoltage((bool)(inputs[INPUT_STEP + i].getVoltage()) * 10.0);
+        outputs[OUTPUT_CURRENT + i].setVoltage(currentin[i] * 10.0);
     }	
 }
 
@@ -83,7 +88,7 @@ struct CM10ModuleWidget : ModuleWidget {
         float c2 = 33.2;
         float rr[6] = {50.7, 102.2, 163.1, 219.6, 271.1, 331.9}; //update positions
 
-		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-10.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-10.svg")));
 
 		//addChild(createWidget<ScrewSilver>(Vec(30, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 16, 0)));
@@ -91,16 +96,16 @@ struct CM10ModuleWidget : ModuleWidget {
 		// addChild(createWidget<ScrewSilver>(Vec(box.size.x - 60, 365)));
 
         //Step 1
-        addParam(createParam<CM_Button_small_red>(Vec(4.7 , 130.1), module, CM10Module::PARAM_REC, 0.0, 1.0, 0.0f));
-        addParam(createParam<CM_Button_small_red>(Vec(34.7 , 130.1), module, CM10Module::PARAM_PLAY, 0.0, 1.0, 0.0f));
-        addInput(createPort<CM_Input_def>(Vec(c1, rr[0]), PortWidget::INPUT, module, CM10Module::INPUT_IN));
-        addInput(createPort<CM_Input_def>(Vec(c1, rr[1]), PortWidget::INPUT, module, CM10Module::INPUT_STEP));
-        addInput(createPort<CM_Input_small>(Vec(c1, rr[2]), PortWidget::INPUT, module, CM10Module::INPUT_REC));
-        addInput(createPort<CM_Input_small>(Vec(c2, rr[2]), PortWidget::INPUT, module, CM10Module::INPUT_PLAY));
+        addParam(createParam<CM_Button_small_red>(Vec(4.7 , 130.1), module, CM10Module::PARAM_REC));
+        addParam(createParam<CM_Button_small_red>(Vec(34.7 , 130.1), module, CM10Module::PARAM_PLAY));
+        addInput(createInput<CM_Input_def>(Vec(c1, rr[0]), module, CM10Module::INPUT_IN));
+        addInput(createInput<CM_Input_def>(Vec(c1, rr[1]), module, CM10Module::INPUT_STEP));
+        addInput(createInput<CM_Input_small>(Vec(c1, rr[2]), module, CM10Module::INPUT_REC));
+        addInput(createInput<CM_Input_small>(Vec(c2, rr[2]), module, CM10Module::INPUT_PLAY));
 
-        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[0]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_OUT));
-        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[1]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_STEP));
-        addOutput(createPort<CM_Output_def>(Vec(18.2 , 72.6 ), PortWidget::OUTPUT, module, CM10Module::OUTPUT_CURRENT));
+        addOutput(createOutput<CM_Output_def>(Vec(c2 , rr[0]), module, CM10Module::OUTPUT_OUT));
+        addOutput(createOutput<CM_Output_def>(Vec(c2 , rr[1]), module, CM10Module::OUTPUT_STEP));
+        addOutput(createOutput<CM_Output_def>(Vec(18.2 , 72.6 ), module, CM10Module::OUTPUT_CURRENT));
 
 
         //LCD displays
@@ -113,16 +118,16 @@ struct CM10ModuleWidget : ModuleWidget {
 		addChild(display1);
 
         //Step 2
-        addParam(createParam<CM_Button_small_red>(Vec(4.7 , 300.4), module, CM10Module::PARAM_REC + 1, 0.0, 1.0, 0.0f));
-        addParam(createParam<CM_Button_small_red>(Vec(34.7 , 300.4), module, CM10Module::PARAM_PLAY + 1, 0.0, 1.0, 0.0f));
-        addInput(createPort<CM_Input_def>(Vec(c1, rr[3]), PortWidget::INPUT, module, CM10Module::INPUT_IN + 1));
-        addInput(createPort<CM_Input_def>(Vec(c1, rr[4]), PortWidget::INPUT, module, CM10Module::INPUT_STEP + 1));
-        addInput(createPort<CM_Input_small>(Vec(c1, rr[5]), PortWidget::INPUT, module, CM10Module::INPUT_REC + 1));
-        addInput(createPort<CM_Input_small>(Vec(c2, rr[5]), PortWidget::INPUT, module, CM10Module::INPUT_PLAY + 1));
+        addParam(createParam<CM_Button_small_red>(Vec(4.7 , 300.4), module, CM10Module::PARAM_REC + 1));
+        addParam(createParam<CM_Button_small_red>(Vec(34.7 , 300.4), module, CM10Module::PARAM_PLAY + 1));
+        addInput(createInput<CM_Input_def>(Vec(c1, rr[3]), module, CM10Module::INPUT_IN + 1));
+        addInput(createInput<CM_Input_def>(Vec(c1, rr[4]), module, CM10Module::INPUT_STEP + 1));
+        addInput(createInput<CM_Input_small>(Vec(c1, rr[5]), module, CM10Module::INPUT_REC + 1));
+        addInput(createInput<CM_Input_small>(Vec(c2, rr[5]), module, CM10Module::INPUT_PLAY + 1));
 
-        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[3]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_OUT + 1));
-        addOutput(createPort<CM_Output_def>(Vec(c2 , rr[4]), PortWidget::OUTPUT, module, CM10Module::OUTPUT_STEP + 1));
-        addOutput(createPort<CM_Output_def>(Vec(18.2 , 241.4 ), PortWidget::OUTPUT, module, CM10Module::OUTPUT_CURRENT)); //update pos
+        addOutput(createOutput<CM_Output_def>(Vec(c2 , rr[3]), module, CM10Module::OUTPUT_OUT + 1));
+        addOutput(createOutput<CM_Output_def>(Vec(c2 , rr[4]), module, CM10Module::OUTPUT_STEP + 1));
+        addOutput(createOutput<CM_Output_def>(Vec(18.2 , 241.4 ), module, CM10Module::OUTPUT_CURRENT)); //update pos
 
         //LCD displays
 		BigLedIndicator *display2 = new BigLedIndicator();

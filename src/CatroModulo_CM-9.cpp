@@ -36,8 +36,8 @@ struct CM9Module : Module {
 
    //initializations
 	int mode;
-    SchmittTrigger clkTrigger;
-	SchmittTrigger rstTrigger;
+    dsp::SchmittTrigger clkTrigger;
+	dsp::SchmittTrigger rstTrigger;
 	CM_stepper stepper;
 	int selector;
 	float ledx = 30.9;
@@ -48,35 +48,37 @@ struct CM9Module : Module {
 	
 	CM9Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		configParam(CM9Module::PARAM_SEL, 0.0, 7.0, 0.0f, "");
+
 	}
 
-	void step() override;
+	void process(const ProcessArgs &args) override;
 
 };
 
-void CM9Module::step() {
+void CM9Module::process(const ProcessArgs &args) {
 	//process inputs
 	int inputsconnected = 0;
 	for (int i = 0; i < 8; i++){
-		if (inputs[INPUT_IN + i].active){
+		if (inputs[INPUT_IN + i].isConnected()){
 			inputsconnected++;
-			ins[i] = inputs[INPUT_IN + i].value;
+			ins[i] = inputs[INPUT_IN + i].getVoltage();
 		}else{
 			ins[i] = 10.0;
 		}
 	}
 
 	//process selector
-	float selectorparam = clamp(round((inputs[INPUT_SEL].active) ? inputs[INPUT_SEL].value * 0.1 * params[PARAM_SEL].value : params[PARAM_SEL].value), 0, 7);
+	float selectorparam = clamp(round((inputs[INPUT_SEL].isConnected()) ? inputs[INPUT_SEL].getVoltage() * 0.1 * params[PARAM_SEL].getValue() : params[PARAM_SEL].getValue()), 0, 7);
 
 	//stepper
-	if (inputs[INPUT_CLK].active){
-		if (inputs[INPUT_RST].active){
-			if (rstTrigger.process(inputs[INPUT_RST].value)){
+	if (inputs[INPUT_CLK].isConnected()){
+		if (inputs[INPUT_RST].isConnected()){
+			if (rstTrigger.process(inputs[INPUT_RST].getVoltage())){
 				stepper.reset();
 			}
 		}
-		if (clkTrigger.process(inputs[INPUT_CLK].value)){
+		if (clkTrigger.process(inputs[INPUT_CLK].getVoltage())){
 			selector = stepper.step(selectorparam);
 		}
 	}else{
@@ -86,31 +88,31 @@ void CM9Module::step() {
 	//process outputs
 	//reset all to 0
 	for (int i = 0; i < NUM_OUTPUTS; i++){
-			outputs[OUTPUT_OUT + i].value = 0.0;
+			outputs[OUTPUT_OUT + i].setVoltage(0.0);
 		}
 	gatemode = true;
 
-	if (inputs[INPUT_1].active){
-		outputs[OUTPUT_OUT + selector].value = inputs[INPUT_1].value;
+	if (inputs[INPUT_1].isConnected()){
+		outputs[OUTPUT_OUT + selector].setVoltage(inputs[INPUT_1].getVoltage());
 		gatemode = false;
 	}
-	if (outputs[OUTPUT_1].active){
+	if (outputs[OUTPUT_1].isConnected()){
 		if (inputsconnected > 0){
-			outputs[OUTPUT_1].value = inputs[INPUT_IN + selector].value;
+			outputs[OUTPUT_1].setVoltage(inputs[INPUT_IN + selector].getVoltage());
 		}else{
-			outputs[OUTPUT_1].value = selector * 1.4285714285714285714285714285714f;
+			outputs[OUTPUT_1].setVoltage(selector * 1.4285714285714285714285714285714f);
 		}
 		
 		
 	}
 	if (gatemode == true){
 		if (inputsconnected > 0){
-			outputs[OUTPUT_OUT + selector].value = inputs[INPUT_IN + selector].value;
+			outputs[OUTPUT_OUT + selector].setVoltage(inputs[INPUT_IN + selector].getVoltage());
 		}else{
-			if (inputs[INPUT_CLK].active){
-				outputs[OUTPUT_OUT + selector].value = (inputs[INPUT_CLK].value > 0) ? 10.0f : 0.0f;
+			if (inputs[INPUT_CLK].isConnected()){
+				outputs[OUTPUT_OUT + selector].setVoltage((inputs[INPUT_CLK].getVoltage() > 0) ? 10.0f : 0.0f);
 			}else{
-				outputs[OUTPUT_OUT + selector].value = 10.0f;
+				outputs[OUTPUT_OUT + selector].setVoltage(10.0f);
 			}
 		}
 	}
@@ -124,7 +126,7 @@ struct CM9ModuleWidget : ModuleWidget {
 
 	CM9ModuleWidget(CM9Module *module) {
 		setModule(module);
-		setPanel(SVG::load(assetPlugin(pluginInstance, "res/CM-9.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-9.svg")));
 
 		//addChild(createWidget<ScrewSilver>(Vec(30, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 16, 0)));
@@ -132,28 +134,28 @@ struct CM9ModuleWidget : ModuleWidget {
 		// addChild(createWidget<ScrewSilver>(Vec(box.size.x - 60, 365)));
 
 		//widget items
-        addParam(createParam<CM_Knob_big_def_tt>(Vec(7.0 , 20.2), module, CM9Module::PARAM_SEL, 0.0, 7.0, 0.0f));
+        addParam(createParam<CM_Knob_big_def_tt>(Vec(7.0 , 20.2), module, CM9Module::PARAM_SEL));
 
-		addInput(createPort<CM_Input_small>(Vec(2.8, 65.9), PortWidget::INPUT, module, CM9Module::INPUT_SEL));
-        addInput(createPort<CM_Input_small>(Vec(50.2 , 30.0), PortWidget::INPUT, module, CM9Module::INPUT_CLK));
-        addInput(createPort<CM_Input_small>(Vec(50.2 , 60.2), PortWidget::INPUT, module, CM9Module::INPUT_RST));
+		addInput(createInput<CM_Input_small>(Vec(2.8, 65.9), module, CM9Module::INPUT_SEL));
+        addInput(createInput<CM_Input_small>(Vec(50.2 , 30.0), module, CM9Module::INPUT_CLK));
+        addInput(createInput<CM_Input_small>(Vec(50.2 , 60.2), module, CM9Module::INPUT_RST));
         
 
 		float a = 5.1;
 		float b = 46.4;
 		float c[8] = {107.5, 135.2, 163.0, 190.7, 218.5, 246.3, 274.0, 301.8};
 
-		addInput(createPort<CM_Input_def>(Vec(25.7, 77.5), PortWidget::INPUT, module, CM9Module::INPUT_1));
+		addInput(createInput<CM_Input_def>(Vec(25.7, 77.5), module, CM9Module::INPUT_1));
 
 		for (int i = 0; i < 8; i++){
-        addInput(createPort<CM_Input_def>(Vec(a, c[i]), PortWidget::INPUT, module, CM9Module::INPUT_IN + i));
+        addInput(createInput<CM_Input_def>(Vec(a, c[i]), module, CM9Module::INPUT_IN + i));
 		}
 
 		for (int i = 0; i < 8; i++){
-        addOutput(createPort<CM_Output_def>(Vec(b , c[i] - 6.1), PortWidget::OUTPUT, module, CM9Module::OUTPUT_OUT + i));
+        addOutput(createOutput<CM_Output_def>(Vec(b , c[i] - 6.1), module, CM9Module::OUTPUT_OUT + i));
 		}
 
-        addOutput(createPort<CM_Output_def>(Vec(25.7 , 326.6), PortWidget::OUTPUT, module, CM9Module::OUTPUT_1));
+        addOutput(createOutput<CM_Output_def>(Vec(25.7 , 326.6), module, CM9Module::OUTPUT_1));
 
 
 		//led selector display
