@@ -27,14 +27,14 @@ struct CM_Knob_small_def : SVGKnob {
 		maxAngle = 1.0*M_PI;
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_small_def.svg")));
         shadow->opacity = 0;
-        
+
 	}
 };
 
 struct CM_Knob_small_def_half : CM_Knob_small_def {
 	CM_Knob_small_def_half() {
 		minAngle = -0.5*M_PI;
-		maxAngle = 0.5*M_PI;        
+		maxAngle = 0.5*M_PI;
 	}
 };
 
@@ -44,7 +44,7 @@ struct CM_Knob_small_red : SVGKnob {
 		maxAngle = 1.0*M_PI;
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_small_red.svg")));
         shadow->opacity = 0;
-        
+
 	}
 };
 
@@ -126,7 +126,7 @@ struct CM_Pot1_big : SVGScrew {
 	CM_Pot1_big() {
 		sw->setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-pot1_big.svg")));
 		box.size = sw->box.size;
-        
+
 	}
 };
 
@@ -214,7 +214,7 @@ struct CM_TryMe_button : SVGSwitch {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-tryme_button_dn.svg")));
 	}
 };
-	
+
 struct CM_Recbutton : SVGSwitch {
 	CM_Recbutton() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-recbutton.svg")));
@@ -261,7 +261,7 @@ struct CM_SelSeq {
 	bool dostep;
 	float recsel;
 	int astep;
-	
+
 	public:
 	bool patternized;
 
@@ -279,12 +279,12 @@ struct CM_SelSeq {
 		int pat1[16] =  {0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1};
 		int pat2[16] =  {0,-1,1,-1,2,-1,3,-1,4,-1,5,-1,6,-1,7,-1};
 		int pat3[16] =  {0,-1,7,-1,6,-1,5,-1,4,-1,3,-1,2,-1,1,-1};
- 
+
 		int pat4[16] =  {0,2,6,4,1,3,7,5,0,2,6,4,1,3,7,5};
 		int pat5[16] =  {0,2,4,6,1,3,5,7,0,2,4,6,1,3,5,7};
 		int pat6[16] =  {0,2,1,3,2,4,3,5,4,6,5,7,6,0,7,1};
 		int pat7[16] =  {0,3,1,4,2,5,3,6,4,7,5,0,6,1,7,2};
- 
+
 		int pat8[16] =  {0,1,2,3,4,5,6,7,7,6,5,4,3,2,1,0};
 		int pat9[16] =  {0,1,2,3,4,3,2,1,0,1,2,3,4,3,2,1};
 		int pat10[16] = {0,1,2,3,2,1,0,1,2,3,2,1,0,1,2,3};
@@ -395,7 +395,7 @@ struct CM_Recorder {
 	void reset(){
 		lastselect = -1.0;
 	}
-	
+
 	void randomize(){
 		srand(time(NULL));
 	}
@@ -423,8 +423,8 @@ struct CM_Recorder {
 		if (randomTrigger.process(dotry)){
 			for (int i = 0; i < 8; i++){
 				for (int j = 0; j < 8; j++) {
-					// rand(); rand(); //call random twice to get more random // might be too slow... 
-					store[i][j] = 2.0 * ((double) rand() / (RAND_MAX)) - 1.0; 
+					// rand(); rand(); //call random twice to get more random // might be too slow...
+					store[i][j] = 2.0 * ((double) rand() / (RAND_MAX)) - 1.0;
 				}
 			}
 			reset();
@@ -459,7 +459,7 @@ struct CM_Recorder {
 						i = 9;
 					}
 				}
-			}	
+			}
 			lastselect = select;
 		}
 		lastscan = scanner;
@@ -600,7 +600,7 @@ struct CM_BpmClock {
 		clk_bpm = bpm;
 		bpm_cv = bpmtocv(bpm);
 		// freq = clk_bpm / 30.0; //double freq! -for halfstep
-	}	
+	}
 	void setcv(float cv){
 		setbpm(cvtobpm(cv));
 	}
@@ -619,12 +619,12 @@ struct CM_BpmClock {
 	}
 
 	void step(float dt){
-		pulsegen();		
+		pulsegen();
 		freq = clk_bpm / 30.0; //double freq! -for halfstep
 		float deltaPhase = fminf(freq * dt, 0.5f); //delta is halftime
 		phase += deltaPhase;
 		if (phase >= 1.0f){phase -= 1.0f;}
-				
+
 	}
 
   	void setReset(float reset) {
@@ -791,14 +791,19 @@ struct CM3_RecBall : TransparentWidget {
 	float *recball_y;
 
 	CM3_RecBall() {
-		recball_x = new float(178.1);
-		recball_y = new float(89.5);
+		recball_x = nullptr;
+		recball_y = nullptr;
 	};
 
 	void draw(const DrawArgs &args) override {
 		//position
-		box.pos.x = *recball_x;
-		box.pos.y = *recball_y;
+		if (recball_x && recball_y) {
+			box.pos.x = *recball_x;
+			box.pos.y = *recball_y;
+		} else {
+			box.pos.x = 178.1;
+			box.pos.y = 89.5;
+		}
 		// circle
 		NVGcolor yellow = nvgRGB(0xff, 0xf4, 0x00);
 		nvgBeginPath(args.vg);
@@ -808,7 +813,7 @@ struct CM3_RecBall : TransparentWidget {
 	}
 };
 
-//bigeye indicators 
+//bigeye indicators
 struct CM3_EyePatch : TransparentWidget {
 
 	float *eyepatch_val;
@@ -827,7 +832,7 @@ struct CM3_EyePatch : TransparentWidget {
 		//position
 		 float relx = -dd * -sin(*eyepatch_val * M_PI);
 		 float rely = dd * -cos(*eyepatch_val * M_PI);
-		
+
 		// circle
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, relx, rely, rr);
@@ -840,8 +845,8 @@ struct CM3_EyePatch : TransparentWidget {
 //yellow led in CM9
 struct CM9_LedIndicator : SVGWidget {
 
-	float *posx;
-	float *posy;
+	float *posx = nullptr;
+	float *posy = nullptr;
 
 	CM9_LedIndicator() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM9_ledinc.svg")));
@@ -849,8 +854,13 @@ struct CM9_LedIndicator : SVGWidget {
 	};
 
 	void draw(const DrawArgs &args) override {
-		box.pos.x = *posx;
-		box.pos.y = *posy;
+		if (posx && posy) {
+			box.pos.x = *posx;
+			box.pos.y = *posy;
+		} else {
+			box.pos.x = 178.1;
+			box.pos.y = 89.5;
+		}
 		SVGWidget::draw(args);
 	}
 };
@@ -878,6 +888,6 @@ struct BigLedIndicator : TransparentWidget {
 			nvgRoundedRect(args.vg, 4.0, 4.0, box.size.x - 8.0, box.size.y - 8.0, 4.0);
 			nvgFillColor(args.vg, nvgRGB(0xff, 0xf4, 0x00));
 			nvgFill(args.vg);;
-		}	
+		}
 	}
 };
