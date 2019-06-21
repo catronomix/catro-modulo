@@ -322,9 +322,6 @@ struct CM3ModuleWidget : ModuleWidget {
 		if (module){
 		recball->recball_x = &module->recball_x;
 		recball->recball_y = &module->recball_y;
-		}else{
-			*recball->recball_x = 178.1;
-			*recball->recball_y = 89.5;
 		}
 		addChild(recball);
 

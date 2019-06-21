@@ -790,7 +790,10 @@ struct CM3_RecBall : TransparentWidget {
 	float *recball_x;
 	float *recball_y;
 
-	CM3_RecBall() {};
+	CM3_RecBall() {
+		recball_x = new float(178.1);
+		recball_y = new float(89.5);
+	};
 
 	void draw(NVGcontext *vg) override {
 		//position
