@@ -1,8 +1,6 @@
 
 # Catro/Modulo modules for VCV Rack
 
-### V1.0.0 still in development, do not attempt to build as long as this message is here.
-
 ![screenshot1](https://github.com/catronomix/catro-modulo/blob/master/CM066.PNG?raw=true)
 
 Full manual (old version, update will follow): <br> https://github.com/catronomix/catro-modulo/blob/master/CM%20manual%20v0.6.5.pdf
@@ -52,9 +50,4 @@ This multifunctional module can act as a selector/router/switch as well as a mod
 
 CM-10: bitStep
 If you want to pass on binary values step by step, this is the module you are looking for.
-There are also buttons and trigger inputs to capture the current state and play it back (bit override)
-
-&nbsp;
-
-## The next update will be 1.0, which will be simply 0.6.6 ported to Rack v1 plugin format.
-### Additional modules (bitCrawl, bitShift and OctoLove) will have to wait untill that is finished.
+There are also buttons and trigger inputs to capture the current state and play it back (override)
