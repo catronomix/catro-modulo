@@ -64,11 +64,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.95571043"
-     inkscape:cx="-128.88785"
-     inkscape:cy="445.98886"
+     inkscape:zoom="1.4535161"
+     inkscape:cx="-127.97237"
+     inkscape:cy="250.00494"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer6"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -493,6 +493,11 @@
          d="m 6.62637,-58.974315 v 0.11187 l -5.87637,0 V -94.86305 l 3.3676575,0"
          style="fill:none;stroke:#c63434;stroke-width:0.80000001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:0;stroke-dasharray:none;stroke-opacity:1" />
     </g>
+    <path
+       inkscape:connector-curvature="0"
+       style="display:inline;opacity:1;fill:#343934;fill-opacity:1;stroke:#000000;stroke-width:1.0930531;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:37.79527664;stroke-opacity:1;paint-order:stroke markers fill;enable-background:new"
+       d="m 4.572271,-97.929835 h 16.145965 c 0.821423,0 1.482719,0.49422 1.482719,1.10811 v 3.26002 c 0,0.6139 -0.661296,1.108117 -1.482719,1.108117 H 4.572271 c -0.8214268,0 -1.4827179,-0.494217 -1.4827179,-1.108117 v -3.26002 c 0,-0.61389 0.6612911,-1.10811 1.4827179,-1.10811 z"
+       id="rect4989" />
   </g>
   <g
      inkscape:groupmode="layer"

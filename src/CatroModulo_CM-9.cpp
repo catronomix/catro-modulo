@@ -157,13 +157,14 @@ struct CM9ModuleWidget : ModuleWidget {
 
         addOutput(createOutput<CM_Output_def>(Vec(25.7 , 326.6), module, CM9Module::OUTPUT_1));
 
-
 		//led selector display
-		CM9_LedIndicator *ledindicator = new CM9_LedIndicator();
-		ledindicator->posx = &module->ledx;
-		ledindicator->posy = &module->ledy;
-		addChild(ledindicator);
-
+		if (module)
+		{
+			CM9_LedIndicator *ledindicator = new CM9_LedIndicator();
+			ledindicator->posx = &module->ledx;
+			ledindicator->posy = &module->ledy;
+			addChild(ledindicator);
+		}
 	}
 };
 

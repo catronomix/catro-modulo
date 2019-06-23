@@ -21,11 +21,3 @@ void init(Plugin *p) {
 	// Any other pluginInstance initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup times of Rack.
 }
-
-//horizontal slider
-// void CM_Slider_big_red::onDragMove(const event::DragMove &e) {
-//     //std::swap(e.mouseDelta.x , e.mouseDelta.y);
-//     //e.mouseDelta.y = -e.mouseDelta.y;
-// 	//e.mouseDelta = math::Vec(0 - e.mouseDelta.y, e.mouseDelta.x);
-//     Knob::onDragMove(e);
-// }

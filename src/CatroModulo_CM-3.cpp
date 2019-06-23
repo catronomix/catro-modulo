@@ -315,53 +315,54 @@ struct CM3ModuleWidget : ModuleWidget {
 		addInput(createInput<CM_Input_def>(Vec(183.5 , 259.0), module, CM3Module::INPUT_SELECT));
 		addInput(createInput<CM_Input_def>(Vec(42.2 , 320.8), module, CM3Module::INPUT_TRYME));
 
-
 		//LCD display pattern
-		TxtDisplayWidget *dispat = new TxtDisplayWidget();
-		dispat->box.pos = Vec(29.9, 11.0);
-		dispat->box.size = Vec(38.0 , 20.4);
-		if (module){
+		if (module)
+		{
+			TxtDisplayWidget *dispat = new TxtDisplayWidget();
+			dispat->box.pos = Vec(29.9, 11.0);
+			dispat->box.size = Vec(38.0, 20.4);
 			dispat->txt = &module->display_pat;
+			addChild(dispat);
 		}
-		addChild(dispat);
 
 		//LCD display length
-		TxtDisplayWidget *dislen = new TxtDisplayWidget();
-		dislen->box.pos = Vec(322.4 , 11.0);
-		dislen->box.size = Vec(38.0 , 20.4);
-		if (module){
+		if (module)
+		{
+			TxtDisplayWidget *dislen = new TxtDisplayWidget();
+			dislen->box.pos = Vec(322.4, 11.0);
+			dislen->box.size = Vec(38.0, 20.4);
 			dislen->txt = &module->display_len;
+			addChild(dislen);
 		}
-		addChild(dislen);
 
 		//selector indicator yellow
-		CM3_RecBall *recball = new CM3_RecBall();
-		recball->box.size = Vec(32.0, 32.0);
 		if (module){
-		recball->recball_x = &module->recball_x;
-		recball->recball_y = &module->recball_y;
+			CM3_RecBall *recball = new CM3_RecBall();
+			recball->box.size = Vec(32.0, 32.0);
+			recball->recball_x = &module->recball_x;
+			recball->recball_y = &module->recball_y;
+			addChild(recball);
 		}
-		addChild(recball);
 
 		//eyepatches: indicate the actual output
-		float dd = 20.5; //distance from origin
-		float rr = 2.5; //radius of circle
-		CM3_EyePatch *eyepatch[8] = {
-			new CM3_EyePatch(77.4, 117.4 , dd, rr),
-			new CM3_EyePatch(55.2, 169.1 , dd, rr),
-			new CM3_EyePatch(77.4 , 220.9 , dd, rr),
-			new CM3_EyePatch(107.0 , 272.6 , dd, rr),
-			new CM3_EyePatch(313.2 , 117.4 , dd, rr),
-			new CM3_EyePatch(335.4 , 169.1 , dd, rr),
-			new CM3_EyePatch(313.2 , 220.9 , dd, rr),
-			new CM3_EyePatch(283.6 , 272.6 , dd, rr)
-		};
-
-		for(int i = 0; i < 8; i ++){
-			if (module){
+		if (module)
+		{
+			float dd = 20.5; //distance from origin
+			float rr = 2.5;  //radius of circle
+			CM3_EyePatch *eyepatch[8] = {
+				new CM3_EyePatch(77.4, 117.4, dd, rr),
+				new CM3_EyePatch(55.2, 169.1, dd, rr),
+				new CM3_EyePatch(77.4, 220.9, dd, rr),
+				new CM3_EyePatch(107.0, 272.6, dd, rr),
+				new CM3_EyePatch(313.2, 117.4, dd, rr),
+				new CM3_EyePatch(335.4, 169.1, dd, rr),
+				new CM3_EyePatch(313.2, 220.9, dd, rr),
+				new CM3_EyePatch(283.6, 272.6, dd, rr)};
+			for (int i = 0; i < 8; i++)
+			{
 				eyepatch[i]->eyepatch_val = &module->eyepatch_val[i];
+				addChild(eyepatch[i]);
 			}
-			addChild(eyepatch[i]);
 		}
 	};
 };

@@ -21,7 +21,7 @@ extern Model *modelCM9Module;
 extern Model *modelCM10Module;
 
 //interface elements
-struct CM_Knob_small_def : SVGKnob {
+struct CM_Knob_small_def : SvgKnob {
 	CM_Knob_small_def() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -38,7 +38,7 @@ struct CM_Knob_small_def_half : CM_Knob_small_def {
 	}
 };
 
-struct CM_Knob_small_red : SVGKnob {
+struct CM_Knob_small_red : SvgKnob {
 	CM_Knob_small_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -48,7 +48,7 @@ struct CM_Knob_small_red : SVGKnob {
 	}
 };
 
-struct CM_Knob_big_def : SVGKnob {
+struct CM_Knob_big_def : SvgKnob {
 	CM_Knob_big_def() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -57,7 +57,7 @@ struct CM_Knob_big_def : SVGKnob {
 	}
 };
 
-struct CM_Knob_big_attn : SVGKnob {
+struct CM_Knob_big_attn : SvgKnob {
 	CM_Knob_big_attn() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -66,7 +66,7 @@ struct CM_Knob_big_attn : SVGKnob {
 	}
 };
 
-struct CM_Knob_big_offset : SVGKnob {
+struct CM_Knob_big_offset : SvgKnob {
 	CM_Knob_big_offset() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -82,7 +82,7 @@ struct CM_Knob_big_def_tt : CM_Knob_big_def {
 	}
 };
 
-struct CM_Knob_big_red : SVGKnob {
+struct CM_Knob_big_red : SvgKnob {
 	CM_Knob_big_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -91,7 +91,7 @@ struct CM_Knob_big_red : SVGKnob {
 	}
 };
 
-struct CM_Knob_huge_red : SVGKnob {
+struct CM_Knob_huge_red : SvgKnob {
 	CM_Knob_huge_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -106,7 +106,7 @@ struct CM_Knob_huge_red_os : CM_Knob_huge_red {
 	}
 };
 
-struct CM_Knob_bigeye : SVGKnob {
+struct CM_Knob_bigeye : SvgKnob {
 	CM_Knob_bigeye() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
@@ -115,14 +115,14 @@ struct CM_Knob_bigeye : SVGKnob {
 	}
 };
 
-struct CM_Pot1_small : SVGScrew {
+struct CM_Pot1_small : SvgScrew {
 	CM_Pot1_small() {
 		sw->setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-pot1_small.svg")));
 		box.size = sw->box.size;
 	}
 };
 
-struct CM_Pot1_big : SVGScrew {
+struct CM_Pot1_big : SvgScrew {
 	CM_Pot1_big() {
 		sw->setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-pot1_big.svg")));
 		box.size = sw->box.size;
@@ -130,15 +130,16 @@ struct CM_Pot1_big : SVGScrew {
 	}
 };
 
-struct CM_Input_def : SVGPort {
+struct CM_Input_def : SvgPort {
 	CM_Input_def() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_def.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_I_def_tinybuttonL : SVGSwitch {
+struct CM_I_def_tinybuttonL : SvgSwitch {
 	CM_I_def_tinybuttonL() {
+		momentary = true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_def_tinybuttonL.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_def_tinybuttonL_dn.svg")));
 	}
@@ -146,26 +147,28 @@ struct CM_I_def_tinybuttonL : SVGSwitch {
 
 struct CM_I_def_tinybuttonR :SVGSwitch {
 	CM_I_def_tinybuttonR() {
+		momentary = true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_def_tinybuttonR.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_def_tinybuttonR_dn.svg")));
 	}
 };
 
-struct CM_Input_small : SVGPort {
+struct CM_Input_small : SvgPort {
 	CM_Input_small() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_small.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_I_small_tinybuttonL : SVGSwitch {
+struct CM_I_small_tinybuttonL : SvgSwitch {
 	CM_I_small_tinybuttonL() {
+		momentary = true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_small_tinybuttonL.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_small_tinybuttonL_dn.svg")));
 	}
 };
 
-struct CM_Input_bpm : SVGPort {
+struct CM_Input_bpm : SvgPort {
 	CM_Input_bpm() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_bpm.svg")));
         shadow->opacity = 0;
@@ -173,74 +176,77 @@ struct CM_Input_bpm : SVGPort {
 };
 
 
-struct CM_Output_def : SVGPort {
+struct CM_Output_def : SvgPort {
 	CM_Output_def() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_def.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_Output_def_dark : SVGPort {
+struct CM_Output_def_dark : SvgPort {
 	CM_Output_def_dark() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_def)dark.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_Output_small : SVGPort {
+struct CM_Output_small : SvgPort {
 	CM_Output_small() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_small.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_Output_bpm : SVGPort {
+struct CM_Output_bpm : SvgPort {
 	CM_Output_bpm() {
 		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_bpm.svg")));
         shadow->opacity = 0;
 	}
 };
 
-struct CM_Switch_small : SVGSwitch {
+struct CM_Switch_small : SvgSwitch {
 	CM_Switch_small() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_small_0.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_small_1.svg")));
 	}
 };
 
-struct CM_TryMe_button : SVGSwitch {
+struct CM_TryMe_button : SvgSwitch {
 	CM_TryMe_button() {
+		momentary = true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-tryme_button.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-tryme_button_dn.svg")));
 	}
 };
 
-struct CM_Recbutton : SVGSwitch {
+struct CM_Recbutton : SvgSwitch {
 	CM_Recbutton() {
+		momentary = true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-recbutton.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-recbutton_dn.svg")));
 	}
 };
 
-struct CM_Button_small_red : SVGSwitch {
+struct CM_Button_small_red : SvgSwitch {
 	CM_Button_small_red() {
+		momentary = true;
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-button_small_red.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-button_small_red_dn.svg")));
 	}
 };
 
-struct CM_Slider_big_red : SVGSlider {
+struct CM_Slider_big_red : SvgSlider {
 	CM_Slider_big_red() {
+		horizontal = true;
 		minHandlePos = Vec(-4, 0);
 		maxHandlePos = Vec(58, 0);
 		setSVGs(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-slider_big_red_bg.svg")), APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-slider_big_red.svg")));
-		//horizontal = true;
 	}
 	//void onDragMove(const event::DragMove &e) override;
 
 };
 
-struct CM_Switch_small_3 : SVGSwitch {
+struct CM_Switch_small_3 : SvgSwitch {
 	CM_Switch_small_3() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_small_3_0.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_small_3_1.svg")));
@@ -843,7 +849,7 @@ struct CM3_EyePatch : TransparentWidget {
 };
 
 //yellow led in CM9
-struct CM9_LedIndicator : SVGWidget {
+struct CM9_LedIndicator : SvgWidget {
 
 	float *posx = nullptr;
 	float *posy = nullptr;

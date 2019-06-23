@@ -109,14 +109,14 @@ struct CM10ModuleWidget : ModuleWidget {
 
 
         //LCD displays
-		BigLedIndicator *display1 = new BigLedIndicator();
-		display1->box.pos = Vec(5.3 , 22.1);
-		display1->box.size = Vec(49.6 , 19.0);
-        if (module){
-		    display1->lit = &module->lit[0];
+        if (module)
+        {
+            BigLedIndicator *display1 = new BigLedIndicator();
+            display1->box.pos = Vec(5.3, 22.1);
+            display1->box.size = Vec(49.6, 19.0);
+            display1->lit = &module->lit[0];
+            addChild(display1);
         }
-		addChild(display1);
-
         //Step 2
         addParam(createParam<CM_Button_small_red>(Vec(4.7 , 300.4), module, CM10Module::PARAM_REC + 1));
         addParam(createParam<CM_Button_small_red>(Vec(34.7 , 300.4), module, CM10Module::PARAM_PLAY + 1));
@@ -127,18 +127,18 @@ struct CM10ModuleWidget : ModuleWidget {
 
         addOutput(createOutput<CM_Output_def>(Vec(c2 , rr[3]), module, CM10Module::OUTPUT_OUT + 1));
         addOutput(createOutput<CM_Output_def>(Vec(c2 , rr[4]), module, CM10Module::OUTPUT_STEP + 1));
-        addOutput(createOutput<CM_Output_def>(Vec(18.2 , 241.4 ), module, CM10Module::OUTPUT_CURRENT)); //update pos
+        addOutput(createOutput<CM_Output_def>(Vec(18.2 , 241.4 ), module, CM10Module::OUTPUT_CURRENT + 1));
 
-        //LCD displays
-		BigLedIndicator *display2 = new BigLedIndicator();
-		display2->box.pos = Vec(5.3 , 190.9);
-		display2->box.size = Vec(49.6 , 19.0);
-        if (module){
-		    display2->lit = &module->lit[1];
+        if (module)
+        {
+            //LCD displays
+            BigLedIndicator *display2 = new BigLedIndicator();
+            display2->box.pos = Vec(5.3, 190.9);
+            display2->box.size = Vec(49.6, 19.0);
+            display2->lit = &module->lit[1];
+            addChild(display2);
         }
-		addChild(display2);
-
-	}
+    }
 };
 
 

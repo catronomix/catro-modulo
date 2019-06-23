@@ -107,15 +107,15 @@ struct CM4ModuleWidget : ModuleWidget {
 		addParam(createParam<CM_Button_small_red>(Vec(29.4 , 251.8), module, CM4Module::PARAM_RST));
 		addOutput(createOutput<CM_Output_small>(Vec(52.4 , 251.8), module, CM4Module::OUTPUT_RST));
 
-		//LCD display
-		NumDisplayWidget *display = new NumDisplayWidget();
-		display->box.pos = Vec(7.0 , 21.0);
-		display->box.size = Vec(61.1 , 20.4);
-		if (module){
+		if (module)
+		{
+			//LCD display
+			NumDisplayWidget *display = new NumDisplayWidget();
+			display->box.pos = Vec(7.0, 21.0);
+			display->box.size = Vec(61.1, 20.4);
 			display->value = &module->bpm_display;
+			addChild(display);
 		}
-		addChild(display);
-		
 	}
 };
 
