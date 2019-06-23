@@ -45,7 +45,7 @@ struct CM3Module : Module {
 	std::string display_len = "";
 	std::string strings_pat[16] = {"SEQ", "REV", "S0Q", "R0V", "NZN", "CUC", "ZZ1", "ZZ2", "U7D", "U4D", "U3D", ">-<", "/\\/", ".-.", "\\/\\", "RND"};
 	std::string strings_len[16] = {" 01", " 02", " 03", " 04", " 05", " 06", " 07", " 08", " 09", " 10", " 11", " 12", " 13", " 14", "15", "16"};
-	SchmittTrigger recordTrigger[16];
+	dsp::SchmittTrigger recordTrigger[16];
 	float iselect = 0.0f;	
 	float recsel = 0.0f;
 	float recball_x = 178.8;
@@ -59,12 +59,31 @@ struct CM3Module : Module {
 	CM_BpmClock bpmclock;
 
 	
-	CM3Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {}
+	CM3Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		int y = 0;
+		for(int i = 0; i < 16; i += 2){
+			configParam(CM3Module::PARAM_REC + y, 0.0f, 1.0f, 0.0f, "");
+			configParam(CM3Module::PARAM_EYE + y, -1.0f, 1.0f, 0.0f, "");
+			y++;
+		}
+		
+		configParam(CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f, "");
+		configParam(CM3Module::PARAM_MORPH, -1.0f, 1.0f, 0.0f, "");
+		configParam(CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f, "");
+		configParam(CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f, "");
+		configParam(CM3Module::PARAM_SCAN, 0.0f, 1.0f, 0.0f, "");
+		configParam(CM3Module::PARAM_SELECT, 0.0f, 7.99999f, 0.0f, "");
+		configParam(CM3Module::PARAM_SEQ, 0.0f, 1.0f, 1.0f, "");
+		configParam(CM3Module::PARAM_RESET, 0.0f, 1.0f, 0.0f, "");
+		configParam(CM3Module::PARAM_STEP, 0.0f, 1.0f, 0.0f, "");
+
+		}
 	
-	void step() override;
+	void process(const ProcessArgs &args) override;
 
 
-	json_t *toJson() override {
+	json_t *dataToJson() override {
 
 		json_t *rootJ = json_object();
 
@@ -80,7 +99,7 @@ struct CM3Module : Module {
 	}
 
 
-	void fromJson(json_t *rootJ) override {
+	void dataFromJson(json_t *rootJ) override {
 		// running
 		json_t *recorderJ = json_object_get(rootJ, "recorder");
 		for (int i = 0; i < 8; i++){
@@ -92,37 +111,37 @@ struct CM3Module : Module {
 	}
 
 	// For more advanced Module features, read Rack's engine.hpp header file
-	// - toJson, fromJson: serialization of internal data
+	// - dataToJson, dataFromJson: serialization of internal data
 	// - onSampleRateChange: event triggered by a change of sample rate
 	// - onReset, onRandomize, onCreate, onDelete: implements special behavior when user clicks these from the context menu
 };
 
-void CM3Module::step() {
+void CM3Module::process(const ProcessArgs &args) {
 
 	//process tryme button
-	recorder.tryme((params[PARAM_TRYME].value || inputs[INPUT_TRYME].value) * 10.0);
+	recorder.tryme((params[PARAM_TRYME].getValue() || inputs[INPUT_TRYME].getVoltage()) * 10.0);
 
 	//mix params and inputs
-	float morph = (inputs[INPUT_MORPH].active) ? inputs[INPUT_MORPH].value * 0.1f + params[PARAM_MORPH].value : params[PARAM_MORPH].value;
-	float seq_active = 1.0 - params[PARAM_SEQ].value;
-	float seq_reset = (inputs[INPUT_RESET].value || params[PARAM_RESET].value);
-	float seq_pattern = clamp(roundf((inputs[INPUT_PATTERN].active) ? inputs[INPUT_PATTERN].value * 0.1f * params[PARAM_PATTERN].value : params[PARAM_PATTERN].value), 0.0, 15.0);
-	float seq_len = clamp(roundf((inputs[INPUT_LENGTH].active) ? inputs[INPUT_LENGTH].value * 0.1f * params[PARAM_LENGTH].value : params[PARAM_LENGTH].value), 0.0, 15.0);
-	float doscan = (params[PARAM_SCAN].value && params[PARAM_SEQ].value);
+	float morph = (inputs[INPUT_MORPH].isConnected()) ? inputs[INPUT_MORPH].getVoltage() * 0.1f + params[PARAM_MORPH].getValue() : params[PARAM_MORPH].getValue();
+	float seq_active = 1.0 - params[PARAM_SEQ].getValue();
+	float seq_reset = (inputs[INPUT_RESET].getVoltage() || params[PARAM_RESET].getValue());
+	float seq_pattern = clamp(roundf((inputs[INPUT_PATTERN].isConnected()) ? inputs[INPUT_PATTERN].getVoltage() * 0.1f * params[PARAM_PATTERN].getValue() : params[PARAM_PATTERN].getValue()), 0.0, 15.0);
+	float seq_len = clamp(roundf((inputs[INPUT_LENGTH].isConnected()) ? inputs[INPUT_LENGTH].getVoltage() * 0.1f * params[PARAM_LENGTH].getValue() : params[PARAM_LENGTH].getValue()), 0.0, 15.0);
+	float doscan = (params[PARAM_SCAN].getValue() && params[PARAM_SEQ].getValue());
 
 	//check for bpm cv
 	float seq_step = 0;
-	if (inputs[INPUT_BPM].active){
-		bpmclock.setcv(inputs[INPUT_BPM].value);
+	if (inputs[INPUT_BPM].isConnected()){
+		bpmclock.setcv(inputs[INPUT_BPM].getVoltage());
 	}
 	
-	bpmclock.setReset(inputs[INPUT_RESET].value || params[PARAM_RESET].value);
+	bpmclock.setReset(inputs[INPUT_RESET].getVoltage() || params[PARAM_RESET].getValue());
 		
-	if (inputs[INPUT_BPM].active){
-		bpmclock.step(engineGetSampleTime());
+	if (inputs[INPUT_BPM].isConnected()){
+		bpmclock.step(args.sampleTime);
 		seq_step = bpmclock.track(1);
 	}else{
-		seq_step = (inputs[INPUT_STEP].value || params[PARAM_STEP].value);
+		seq_step = (inputs[INPUT_STEP].getVoltage() || params[PARAM_STEP].getValue());
 	}
 
 
@@ -130,16 +149,16 @@ void CM3Module::step() {
 	float eyeval[8] = {};
 	for (int i = 0; i < 8; i++) {
 		float in = 1.0f;
-		float eye = params[i+PARAM_EYE].value;
-		if (inputs[i+PARAM_EYE].active){
-			in = inputs[i+PARAM_EYE].value * 0.1f;
+		float eye = params[i+PARAM_EYE].getValue();
+		if (inputs[i+PARAM_EYE].isConnected()){
+			in = inputs[i+PARAM_EYE].getVoltage() * 0.1f;
 		}
 		eyeval[i] = clamp(in * eye, -1.0f, 1.0f);
 	}
 
 	//record when requested
 		for (int i = 0; i < 8; i++) {
-			if (recordTrigger[i].process((inputs[INPUT_REC+i].value || params[PARAM_REC+i].value))){
+			if (recordTrigger[i].process((inputs[INPUT_REC+i].getVoltage() || params[PARAM_REC+i].getValue()))){
 				recorder.record(eyeval, i);
 			}
 		}
@@ -152,15 +171,15 @@ void CM3Module::step() {
 			iselect = sequencer.sequence(seq_pattern);
 		}
 	}else{
-		iselect = clamp((inputs[INPUT_SELECT].active) ? inputs[INPUT_SELECT].value * 0.1f * params[PARAM_SELECT].value : params[PARAM_SELECT].value, 0.0, 7.99999f);
+		iselect = clamp((inputs[INPUT_SELECT].isConnected()) ? inputs[INPUT_SELECT].getVoltage() * 0.1f * params[PARAM_SELECT].getValue() : params[PARAM_SELECT].getValue(), 0.0, 7.99999f);
 	}
 	recorder.scan(iselect, doscan);
 	recorder.mix(eyeval,morph);
 	for (int i = 0; i < 8; i++) {
 		if (iselect != -1.0){
-			outputs[OUTPUT_EYE + i].value = recorder.output(i);
+			outputs[OUTPUT_EYE + i].setVoltage(recorder.output(i));
 		}else{
-			outputs[OUTPUT_EYE + i].value = 0.0f;
+			outputs[OUTPUT_EYE + i].setVoltage(0.0f);
 		}
 		
 	}
@@ -184,13 +203,14 @@ void CM3Module::step() {
 
 struct CM3ModuleWidget : ModuleWidget {
 
-	CM3ModuleWidget(CM3Module *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-3.svg")));
+	CM3ModuleWidget(CM3Module *module) {
+		setModule(module);
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-3.svg")));
 
-		addChild(Widget::create<ScrewSilver>(Vec(10, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 20, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(30, 365)));
-		addChild(Widget::create<ScrewSilver>(Vec(box.size.x - 40, 365)));
+		addChild(createWidget<ScrewSilver>(Vec(10, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 20, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(30, 365)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 40, 365)));
 
 		int y = 0; //initialize reusable counter
 
@@ -205,7 +225,7 @@ struct CM3ModuleWidget : ModuleWidget {
 							    145.3 , 119.9 };
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addParam(ParamWidget::create<CM_Recbutton>(Vec(recbuttons[i],recbuttons[i+1] - 0.5), module, CM3Module::PARAM_REC + y, 0.0f, 1.0f, 0.0f));
+			addParam(createParam<CM_Recbutton>(Vec(recbuttons[i],recbuttons[i+1] - 0.5), module, CM3Module::PARAM_REC + y));
 			y++;
 		}
 
@@ -220,7 +240,7 @@ struct CM3ModuleWidget : ModuleWidget {
 							174.5 , 149.0 };
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addInput(Port::create<CM_Input_small>(Vec(recin[i],recin[i+1] - 0.5), Port::INPUT, module, CM3Module::INPUT_REC + y));
+			addInput(createInput<CM_Input_small>(Vec(recin[i],recin[i+1] - 0.5), module, CM3Module::INPUT_REC + y));
 			y++;
 		}
 
@@ -238,7 +258,7 @@ struct CM3ModuleWidget : ModuleWidget {
 
 		for(int i = 0; i < 16; i += 2){
 			
-			addParam(ParamWidget::create<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, CM3Module::PARAM_EYE + y, -1.0f, 1.0f, 0.0f));
+			addParam(createParam<CM_Knob_bigeye>(Vec(bigeyes[i],bigeyes[i+1] - 0.5), module, CM3Module::PARAM_EYE + y));
 			y++;
 		}
 
@@ -253,7 +273,7 @@ struct CM3ModuleWidget : ModuleWidget {
 							240.3 , 243.4};
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addInput(Port::create<CM_Input_small>(Vec(eyein[i],eyein[i+1] - 0.5), Port::INPUT, module, CM3Module::INPUT_EYE + y));
+			addInput(createInput<CM_Input_small>(Vec(eyein[i],eyein[i+1] - 0.5), module, CM3Module::INPUT_EYE + y));
 			y++;
 		}
 
@@ -268,79 +288,88 @@ struct CM3ModuleWidget : ModuleWidget {
 							304.5 , 281.4};
 		y = 0;
 		for(int i = 0; i < 16; i += 2){
-			addOutput(Port::create<CM_Output_small>(Vec(eyeout[i],eyeout[i+1] - 0.5), Port::OUTPUT, module, CM3Module::OUTPUT_EYE + y));
+			addOutput(createOutput<CM_Output_small>(Vec(eyeout[i],eyeout[i+1] - 0.5), module, CM3Module::OUTPUT_EYE + y));
 			y++;
 		}
 
 		//OTHER ELEMENTS
-		addParam(ParamWidget::create<CM_Knob_small_def_half>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Slider_big_red>(Vec(156.5 , 17.9), module, CM3Module::PARAM_MORPH, -1.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Knob_small_def_half>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f));
-		addParam(ParamWidget::create<CM_TryMe_button>(Vec(15.0 , 320.1), module, CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Switch_small>(Vec(137.8 , 309.0), module, CM3Module::PARAM_SCAN, 0.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_Knob_huge_red_os>(Vec(161.3 , 286.0), module, CM3Module::PARAM_SELECT, 0.0f, 7.99999f, 0.0f));
-		//addParam(ParamWidget::create<CM_Knob_small_def>(Vec(232.2 , 304.5), module,PARAM_Q, 0.1f, 0.9f, 0.5f)); //maybe implement later?
-		addParam(ParamWidget::create<CM_Switch_small>(Vec(366. , 309.0), module, CM3Module::PARAM_SEQ, 0.0f, 1.0f, 1.0f));
-		addParam(ParamWidget::create<CM_I_def_tinybuttonR>(Vec(263.0 , 38.7), module, CM3Module::PARAM_RESET, 0.0f, 1.0f, 0.0f));
-		addParam(ParamWidget::create<CM_I_def_tinybuttonL>(Vec(85.4 , 38.7), module, CM3Module::PARAM_STEP, 0.0f, 1.0f, 0.0f));
+		addParam(createParam<CM_Knob_small_def_half>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN));
+		addParam(createParam<CM_Slider_big_red>(Vec(156.5 , 17.9), module, CM3Module::PARAM_MORPH));
+		addParam(createParam<CM_Knob_small_def_half>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH));
+		addParam(createParam<CM_TryMe_button>(Vec(15.0 , 320.1), module, CM3Module::PARAM_TRYME));
+		addParam(createParam<CM_Switch_small>(Vec(137.8 , 309.0), module, CM3Module::PARAM_SCAN));
+		addParam(createParam<CM_Knob_huge_red_os>(Vec(161.3 , 286.0), module, CM3Module::PARAM_SELECT));
+		//addParam(createParam<CM_Knob_small_def>(Vec(232.2 , 304.5), module,PARAM_Q, 0.1f, 0.9f, 0.5f)); //maybe implement later?
+		addParam(createParam<CM_Switch_small>(Vec(366. , 309.0), module, CM3Module::PARAM_SEQ));
+		addParam(createParam<CM_I_def_tinybuttonR>(Vec(263.0 , 38.7), module, CM3Module::PARAM_RESET));
+		addParam(createParam<CM_I_def_tinybuttonL>(Vec(85.4 , 38.7), module, CM3Module::PARAM_STEP));
 
 
 
-		addInput(Port::create<CM_Input_def>(Vec(15.7 , 60.1), Port::INPUT, module, CM3Module::INPUT_PATTERN));
-		addInput(Port::create<CM_Input_def>(Vec(94.0 , 38.7), Port::INPUT, module, CM3Module::INPUT_STEP));
-		addInput(Port::create<CM_Input_bpm>(Vec(127.5 , 38.7), Port::INPUT, module, CM3Module::INPUT_BPM));
-		addInput(Port::create<CM_Input_def>(Vec(183.5 , 45.4), Port::INPUT, module, CM3Module::INPUT_MORPH));
-		addInput(Port::create<CM_Input_def>(Vec(250.8 , 38.7), Port::INPUT, module, CM3Module::INPUT_RESET));
-		addInput(Port::create<CM_Input_def>(Vec(352.3 , 61.4), Port::INPUT, module, CM3Module::INPUT_LENGTH));
-		addInput(Port::create<CM_Input_def>(Vec(183.5 , 259.0), Port::INPUT, module, CM3Module::INPUT_SELECT));
-		addInput(Port::create<CM_Input_def>(Vec(42.2 , 320.8), Port::INPUT, module, CM3Module::INPUT_TRYME));
-
+		addInput(createInput<CM_Input_def>(Vec(15.7 , 60.1), module, CM3Module::INPUT_PATTERN));
+		addInput(createInput<CM_Input_def>(Vec(94.0 , 38.7), module, CM3Module::INPUT_STEP));
+		addInput(createInput<CM_Input_bpm>(Vec(127.5 , 38.7), module, CM3Module::INPUT_BPM));
+		addInput(createInput<CM_Input_def>(Vec(183.5 , 45.4), module, CM3Module::INPUT_MORPH));
+		addInput(createInput<CM_Input_def>(Vec(250.8 , 38.7), module, CM3Module::INPUT_RESET));
+		addInput(createInput<CM_Input_def>(Vec(352.3 , 61.4), module, CM3Module::INPUT_LENGTH));
+		addInput(createInput<CM_Input_def>(Vec(183.5 , 259.0), module, CM3Module::INPUT_SELECT));
+		addInput(createInput<CM_Input_def>(Vec(42.2 , 320.8), module, CM3Module::INPUT_TRYME));
 
 		//LCD display pattern
-		TxtDisplayWidget *dispat = new TxtDisplayWidget();
-		dispat->box.pos = Vec(29.9, 11.0);
-		dispat->box.size = Vec(38.0 , 20.4);
-		dispat->txt = &module->display_pat;
-		addChild(dispat);
+		if (module)
+		{
+			TxtDisplayWidget *dispat = new TxtDisplayWidget();
+			dispat->box.pos = Vec(29.9, 11.0);
+			dispat->box.size = Vec(38.0, 20.4);
+			dispat->txt = &module->display_pat;
+			addChild(dispat);
+		}
 
 		//LCD display length
-		TxtDisplayWidget *dislen = new TxtDisplayWidget();
-		dislen->box.pos = Vec(322.4 , 11.0);
-		dislen->box.size = Vec(38.0 , 20.4);
-		dislen->txt = &module->display_len;
-		addChild(dislen);
+		if (module)
+		{
+			TxtDisplayWidget *dislen = new TxtDisplayWidget();
+			dislen->box.pos = Vec(322.4, 11.0);
+			dislen->box.size = Vec(38.0, 20.4);
+			dislen->txt = &module->display_len;
+			addChild(dislen);
+		}
 
 		//selector indicator yellow
-		CM3_RecBall *recball = new CM3_RecBall();
-		recball->box.size = Vec(32.0, 32.0);
-		recball->recball_x = &module->recball_x;
-		recball->recball_y = &module->recball_y;
-		addChild(recball);
+		if (module){
+			CM3_RecBall *recball = new CM3_RecBall();
+			recball->box.size = Vec(32.0, 32.0);
+			recball->recball_x = &module->recball_x;
+			recball->recball_y = &module->recball_y;
+			addChild(recball);
+		}
 
 		//eyepatches: indicate the actual output
-		float dd = 20.5; //distance from origin
-		float rr = 2.5; //radius of circle
-		CM3_EyePatch *eyepatch[8] = {
-			new CM3_EyePatch(77.4, 117.4 , dd, rr),
-			new CM3_EyePatch(55.2, 169.1 , dd, rr),
-			new CM3_EyePatch(77.4 , 220.9 , dd, rr),
-			new CM3_EyePatch(107.0 , 272.6 , dd, rr),
-			new CM3_EyePatch(313.2 , 117.4 , dd, rr),
-			new CM3_EyePatch(335.4 , 169.1 , dd, rr),
-			new CM3_EyePatch(313.2 , 220.9 , dd, rr),
-			new CM3_EyePatch(283.6 , 272.6 , dd, rr)
-		};
-
-		for(int i = 0; i < 8; i ++){
+		if (module)
+		{
+			float dd = 20.5; //distance from origin
+			float rr = 2.5;  //radius of circle
+			CM3_EyePatch *eyepatch[8] = {
+				new CM3_EyePatch(77.4, 117.4, dd, rr),
+				new CM3_EyePatch(55.2, 169.1, dd, rr),
+				new CM3_EyePatch(77.4, 220.9, dd, rr),
+				new CM3_EyePatch(107.0, 272.6, dd, rr),
+				new CM3_EyePatch(313.2, 117.4, dd, rr),
+				new CM3_EyePatch(335.4, 169.1, dd, rr),
+				new CM3_EyePatch(313.2, 220.9, dd, rr),
+				new CM3_EyePatch(283.6, 272.6, dd, rr)};
+			for (int i = 0; i < 8; i++)
+			{
 				eyepatch[i]->eyepatch_val = &module->eyepatch_val[i];
 				addChild(eyepatch[i]);
+			}
 		}
 	};
 };
 
 
 // Specify the Module and ModuleWidget subclass, human-readable
-// author name for categorization per plugin, module slug (should never
+// author name for categorization per pluginInstance, module slug (should never
 // change), human-readable module name, and any number of tags
 // (found in `include/tags.hpp`) separated by commas.
-Model *modelCM3Module = Model::create<CM3Module, CM3ModuleWidget>("CatroModulo", "CatroModulo_CM-3", "PreSetSeq", SEQUENCER_TAG);
+Model *modelCM3Module = createModel<CM3Module, CM3ModuleWidget>("CatroModulo_CM-3");

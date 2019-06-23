@@ -18,23 +18,25 @@ struct CM6Module : Module {
 		NUM_LIGHTS
 	};
 
-	CM6Module() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
+	CM6Module() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	}
-	void step() override;
+	void process(const ProcessArgs &args) override;
 };
 
-void CM6Module::step() {
+void CM6Module::process(const ProcessArgs &args) {
 }
 
 struct CM6ModuleWidget : ModuleWidget {
 
-	CM6ModuleWidget(CM6Module *module) : ModuleWidget(module) {
-		setPanel(SVG::load(assetPlugin(plugin, "res/CM-6.svg")));
+	CM6ModuleWidget(CM6Module *module) {
+		setModule(module);
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-6.svg")));
 
-		addChild(Widget::create<ScrewSilver>(Vec(1, 0)));
-		addChild(Widget::create<ScrewSilver>(Vec(1, 365)));
+		addChild(createWidget<ScrewSilver>(Vec(1, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(1, 365)));
 
 	}
 };
 
-Model *modelCM6Module = Model::create<CM6Module, CM6ModuleWidget>("CatroModulo", "CatroModulo_CM-6", "1hp blank", BLANK_TAG);
+Model *modelCM6Module = createModel<CM6Module, CM6ModuleWidget>("CatroModulo_CM-6");
