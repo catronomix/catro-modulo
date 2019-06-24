@@ -32,7 +32,8 @@ script:
 
 deploy:
   provider: releases
-  api_key: e65b25c883f631228c79b62d88f61c6ba937df80
+  api_key:
+    secure: 
   file_glob: true
   file: dist/CatroModulo-*-*.zip
   skip_cleanup: true  # Don't remove dist/ before uploading files
