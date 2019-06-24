@@ -64,8 +64,8 @@ void CM2Module::process(const ProcessArgs &args) {
 		float out = 0.0f;
 
 		//cv process
-		float attn = (inputs[INPUTS_ATN + i].isConnected()) ? clamp(inputs[INPUTS_ATN].getVoltage(), -10.0, 10.0) * 0.1 * params[PARAMS_ATN + i].getValue() : params[PARAMS_ATN + i].getValue();
-		float offset = (inputs[INPUTS_OFF + i].isConnected()) ? clamp(inputs[INPUTS_OFF].getVoltage(), -10.0, 10.0) + params[PARAMS_OFF + i].getValue() : params[PARAMS_OFF + i].getValue();
+		float attn = (inputs[INPUTS_ATN + i].isConnected()) ? clamp(inputs[INPUTS_ATN + i].getVoltage(), -10.0, 10.0) * 0.1 * params[PARAMS_ATN + i].getValue() : params[PARAMS_ATN + i].getValue();
+		float offset = (inputs[INPUTS_OFF + i].isConnected()) ? clamp(inputs[INPUTS_OFF + i].getVoltage(), -10.0, 10.0) + params[PARAMS_OFF + i].getValue() : params[PARAMS_OFF + i].getValue();
 
 		if (inputs[INPUTS_IN + i].isConnected() == true || outputs[i].isConnected() == true) {
 			if (inputs[INPUTS_IN + i].isConnected() == true) {
