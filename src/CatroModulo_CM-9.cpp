@@ -35,7 +35,7 @@ struct CM9Module : Module {
 	};
 
    //initializations
-	int mode;
+	//int mode;
     dsp::SchmittTrigger clkTrigger;
 	dsp::SchmittTrigger rstTrigger;
 	CM_stepper stepper;

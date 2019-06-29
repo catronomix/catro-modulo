@@ -76,7 +76,7 @@ struct CM8Module : Module {
 		srand(time(NULL));
 		cia = 1;
 		lo = hi = lastA = lastB = currentA = currentB = 0.0;
-		binarymode = true;
+		binarymode = false;
 	}
 	void process(const ProcessArgs &args) override;
 };
