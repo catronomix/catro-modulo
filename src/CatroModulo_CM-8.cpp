@@ -9,6 +9,7 @@ struct CM8Module : Module {
 		PARAM__a,
 		PARAM__b,
         PARAM_CIA,
+		PARAM_BMODE,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -63,14 +64,19 @@ struct CM8Module : Module {
    float lastB;
    float currentA;
    float currentB;
+   bool binarymode;
 	
 	CM8Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(CM8Module::PARAM__a, -10.0, 10.0, 0.0f, "");
-		configParam(CM8Module::PARAM__b, -10.0, 10.0, 0.0f, "");
-		configParam(CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f, "");
+		configParam(CM8Module::PARAM__a, -10.0, 10.0, 0.0f, "Lower treshold");
+		configParam(CM8Module::PARAM__b, -10.0, 10.0, 0.0f, "Upper treshold");
+		configParam(CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f, "Centered - Inversing - Additive");
+		configParam(CM8Module::PARAM_BMODE, 0.0f, 1.0f, 0.0f, "Binary mode");
 
-			srand(time(NULL));
+		srand(time(NULL));
+		cia = 1;
+		lo = hi = lastA = lastB = currentA = currentB = 0.0;
+		binarymode = true;
 	}
 	void process(const ProcessArgs &args) override;
 };
@@ -119,33 +125,42 @@ void CM8Module::process(const ProcessArgs &args) {
 	if (! inputs[INPUT_B].isConnected()) currentB = (inputs[INPUT_A].isConnected()) ? cm_gauss(5.0, currentA) : cm_gauss(10.0);
 
 	//sample and hold
-	if (inputs[INPUT_SNH].isConnected()){
-		if (snhTrigger.process(inputs[INPUT_SNH].getVoltage())){
+	if (inputs[INPUT_SNH].isConnected())
+	{
+		if (snhTrigger.process(inputs[INPUT_SNH].getVoltage()))
+		{
 			lastA = currentA;
 			lastB = currentB;
 		}
 		currentA = lastA;
 		currentB = lastB;
 	}
-	
+
+	int binA = currentA;
+	int binB = currentB;
+	if (params[PARAM_BMODE].value == 1)
+	{
+		binA = (binA > 0) ? 10.0 : 0.0;
+		binB = (binB > 0) ? 10.0 : 0.0;
+	}
 
 	//A
-	outputs[OUTPUT_ALTB].setVoltage((currentA > currentB) * 10.0);
-	outputs[OUTPUT_AISB].setVoltage((currentA == currentB) * 10.0);
-	outputs[OUTPUT_ACLM].setVoltage(cm_clamp(currentA, lo, hi));
-	outputs[OUTPUT_AFLD].setVoltage(cm_fold(currentA, lo, hi));
-	outputs[OUTPUT_ALO].setVoltage((currentA <= hi) * 10.0);
-	outputs[OUTPUT_AHI].setVoltage((currentA >= lo) * 10.0);
-	outputs[OUTPUT_ARNG].setVoltage((currentA > lo && currentA < hi) * 10.0);
+	outputs[OUTPUT_ALTB].setVoltage((binA > binB) * 10.0);
+	outputs[OUTPUT_AISB].setVoltage((binA == binB) * 10.0);
+	outputs[OUTPUT_ACLM].setVoltage(cm_clamp(binA, lo, hi));
+	outputs[OUTPUT_AFLD].setVoltage(cm_fold(binA, lo, hi));
+	outputs[OUTPUT_ALO].setVoltage((currentA < lo) * 10.0);
+	outputs[OUTPUT_AHI].setVoltage((currentA > hi) * 10.0);
+	outputs[OUTPUT_ARNG].setVoltage((currentA >= lo && currentA <= hi) * 10.0);
 
 	//B
-	outputs[OUTPUT_BLTA].setVoltage((currentA < currentB) * 10.0);
-	outputs[OUTPUT_ANTB].setVoltage(!(currentA == currentB) * 10.0);
-	outputs[OUTPUT_BCLM].setVoltage(cm_clamp(currentB, lo, hi));
-	outputs[OUTPUT_BFLD].setVoltage(cm_fold(currentB, lo, hi));
-	outputs[OUTPUT_BLO].setVoltage((currentB <= hi) * 10.0);
-	outputs[OUTPUT_BHI].setVoltage((currentB >= lo) * 10.0);
-	outputs[OUTPUT_BRNG].setVoltage((currentB > lo && currentB < hi) * 10.0);
+	outputs[OUTPUT_BLTA].setVoltage((binA < binB) * 10.0);
+	outputs[OUTPUT_ANTB].setVoltage(!(binA == binB) * 10.0);
+	outputs[OUTPUT_BCLM].setVoltage(cm_clamp(binB, lo, hi));
+	outputs[OUTPUT_BFLD].setVoltage(cm_fold(binB, lo, hi));
+	outputs[OUTPUT_BLO].setVoltage((currentB < lo) * 10.0);
+	outputs[OUTPUT_BHI].setVoltage((currentB > hi) * 10.0);
+	outputs[OUTPUT_BRNG].setVoltage((currentB >= lo && currentB <= hi) * 10.0);
 
 
 }
@@ -172,6 +187,7 @@ struct CM8ModuleWidget : ModuleWidget {
         addOutput(createOutput<CM_Output_small>(Vec(50.0 , 78.3), module, CM8Module::OUTPUT__b));
 
 		addParam(createParam<CM_Switch_small_3>(Vec(16.4, 103.3), module, CM8Module::PARAM_CIA));
+		addParam(createParam<CM_Ledbutton_mini>(Vec(5.0, 117.2), module, CM8Module::PARAM_BMODE));
 		addInput(createInput<CM_Input_small>(Vec(54.0 , 112.7), module, CM8Module::INPUT_SNH));
 
 		float a = 5.4;

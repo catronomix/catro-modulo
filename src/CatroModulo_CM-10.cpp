@@ -58,7 +58,7 @@ void CM10Module::process(const ProcessArgs &args) {
                 currentin[i] = rec[i];
                 play[i] = false;
             }else{
-                currentin[i] = inputs[INPUT_IN + i].getVoltage();
+                currentin[i] = (inputs[INPUT_IN + i].getVoltage() > 0);
             }
             
             lit[i] = currentin[i];

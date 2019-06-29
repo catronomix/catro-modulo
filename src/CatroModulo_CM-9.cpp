@@ -39,7 +39,7 @@ struct CM9Module : Module {
     dsp::SchmittTrigger clkTrigger;
 	dsp::SchmittTrigger rstTrigger;
 	CM_stepper stepper;
-	int selector;
+	int selector = 0;
 	float ledx = 30.9;
 	float ledy = 50.0;
 	float ins[8];

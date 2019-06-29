@@ -48,8 +48,9 @@ struct CM3Module : Module {
 	dsp::SchmittTrigger recordTrigger[16];
 	float iselect = 0.0f;	
 	float recsel = 0.0f;
-	float recball_x = 178.8;
-	float recball_y = 89.5;
+	int ballsel = 0;
+	float recball_x;
+	float recball_y;
 	float recball_xarray[8] = {178.8 , 212.4 , 242.7 , 212.4 , 178.8 , 145.3 , 115.0 , 145.3};
 	float recball_yarray[8] = {89.5 , 119.9 , 153.4 , 186.9 , 217.2 , 186.9 , 153.4 , 119.9 };
 	float eyepatch_val[8] = {};	
@@ -78,6 +79,8 @@ struct CM3Module : Module {
 		configParam(CM3Module::PARAM_RESET, 0.0f, 1.0f, 0.0f, "");
 		configParam(CM3Module::PARAM_STEP, 0.0f, 1.0f, 0.0f, "");
 
+		recball_x = recball_xarray[0];
+		recball_y = recball_yarray[0];
 		}
 	
 	void process(const ProcessArgs &args) override;
@@ -195,8 +198,12 @@ void CM3Module::process(const ProcessArgs &args) {
 
 	//recball
 	if (iselect != -1.0){
-		recball_x = recball_xarray[int(iselect)] + 9.0;
-		recball_y = recball_yarray[int(iselect)] + 9.0;
+		ballsel = (int(iselect + 0.5) > 7) ? 0 : int(iselect + 0.5);
+		recball_x = recball_xarray[ballsel] + 9.0;
+		recball_y = recball_yarray[ballsel] + 9.0;
+	}else{
+		recball_x = recball_xarray[0];
+		recball_y = recball_yarray[0];
 	}
 	
 }

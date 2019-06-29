@@ -254,6 +254,13 @@ struct CM_Switch_small_3 : SvgSwitch {
 	}
 };
 
+struct CM_Ledbutton_mini : SvgSwitch {
+	CM_Ledbutton_mini() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-ledbutton_mini_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-ledbutton_mini_1.svg")));
+	}
+};
+
 
 
 //mechanisms
@@ -355,7 +362,7 @@ struct CM_SelSeq {
 
 	void reset(float ireset){
 		if (resetTrigger.process(ireset)) {
-			astep = 0;
+			astep = -1;
 			dostep = true;
 		}
 	}
@@ -369,13 +376,16 @@ struct CM_SelSeq {
 
 	//Main sequencer function
 	float sequence(int pat){
-		if (dostep == true){
+		if (dostep == true && astep >= 0){
 			if (pat == 15){
 				recsel = cm_gauss(4.0, 4.0);
 			}else{
 				recsel = patterns[pat][astep];
 			}
 			dostep = false;
+		}else if (astep == -1){
+			recsel = patterns[pat][0];
+			dostep == true;
 		}
 		return recsel;
 	}
@@ -493,89 +503,6 @@ struct CM_Recorder {
 	}
 };
 
-//try something else?
-// struct CM_BpmStreamer {
-// 	int mcount = 0;
-// 	float bpm_cv = 0;
-// 	float reset = 0;
-// 	float demuxbuffer[4] = {};
-
-// 	CM_BpmStreamer(){}
-
-// 	void process(const ProcessArgs &args){
-// 		mcount = (mcount < 3) ? mcount + 1 : 0;
-// 	}
-
-// 	float mux(){
-// 		float muxed = 0.0;
-// 		if (mcount == 0){
-// 			muxed = -5.1;
-// 		}
-// 		if (mcount == 1){
-// 			muxed = bpm_cv;
-// 		}
-// 		if (mcount == 2){
-// 			muxed = reset;
-// 		}
-// 		if (mcount == 3){
-// 			muxed = -10.1;
-// 		}
-// 		return muxed;
-// 	}
-
-// 	float mux(float signal){
-// 		float muxed = 0.0;
-// 		if (mcount == 0){
-// 			muxed = -5.1;
-// 		}
-// 		if (mcount == 1){
-// 			muxed = signal;
-// 		}
-// 		if (mcount == 2){
-// 			muxed = reset;
-// 		}
-// 		if (mcount == 3){
-// 			muxed = -10.1;
-// 		}
-// 		return muxed;
-// 	}
-
-// 	bool demux(float signal){
-// 		demuxbuffer[3] = demuxbuffer[2];
-// 		demuxbuffer[2] = demuxbuffer[1];
-// 		demuxbuffer[1] = demuxbuffer[0];
-// 		demuxbuffer[0] = signal;
-// 		if (demuxbuffer[0] == -10.1 && demuxbuffer[3] == -5.1){
-// 			bpm_cv = demuxbuffer[2];
-// 			reset = demuxbuffer[1];
-// 			return true;
-// 		}else{
-// 			return false;
-// 		}
-// 	}
-
-// 	float test(){
-// 		return (demuxbuffer[0] < -10.0 && demuxbuffer[0] > -11.0) * 10.0;
-// 	}
-
-// 	void setcv(float cv){
-// 		bpm_cv = cv;
-// 	}
-
-// 	void setreset(float rst){
-// 		reset = (rst >= 5.0) ? 10.0 : 0.0;
-// 	}
-
-// 	float getcv(){
-// 		return bpm_cv;
-// 	}
-
-// 	float getreset(){
-// 		return reset;
-// 	}
-
-// };
-
 //BPM system
 struct CM_BpmClock {
 	private:
@@ -589,6 +516,7 @@ struct CM_BpmClock {
 	dsp::SchmittTrigger trackingTrigger[3];
 	float bpm_out[3] = {};
 	float clk_out[3] = {};
+	int resetframes = 0;
 
 	public:
 
@@ -610,7 +538,7 @@ struct CM_BpmClock {
 	void setcv(float cv){
 		setbpm(cvtobpm(cv));
 	}
-
+	
 	float addcv(float cv){
 		setbpm(clk_bpm + cvtobpm(cv));
 		return bpm_cv;
@@ -636,17 +564,27 @@ struct CM_BpmClock {
   	void setReset(float reset) {
 		if (resetTrigger.process(reset)) {
 			phase = 0.0f;
-			clk_out[0] = 1.0;
-			clk_out[1] = 1.0;
-			clk_out[2] = 1.0;
 			trackingTrigger[0].reset();
 			trackingTrigger[1].reset();
 			trackingTrigger[2].reset();
+			clk_out[0] = 1.0;
+			clk_out[1] = 1.0;
+			clk_out[2] = 1.0;
+			resetframes = 1;
 		}
 	}
 
 	float track(int out){
-		return clk_out[out];
+		if (resetframes == 0){
+			return clk_out[out];
+		}else if (resetframes < 22){
+			resetframes++;
+			return 0.0;
+		}else{
+			resetframes = 0;
+			return 1.0;
+		}
+		
 	}
 
 	float bpmtocv(float bpm){
