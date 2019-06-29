@@ -3,7 +3,7 @@
 
 ![screenshot1](https://github.com/catronomix/catro-modulo/blob/master/CM066.PNG?raw=true)
 
-Full manual (old version, update will follow): <br> https://github.com/catronomix/catro-modulo/blob/master/CM%20manual%20v0.6.5.pdf
+Full manual (old version, update will follow): <br> https://github.com/catronomix/catro-modulo/blob/master/CM-manual-v0.6.5.pdf
 
 CM-1: 8xlfo <br>
 8 LFOs that blend between sine, square, saw and triangle waves
