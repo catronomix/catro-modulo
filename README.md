@@ -1,7 +1,10 @@
 
 # Catro/Modulo modules for VCV Rack
 
+Watch the demo on Youtube: https://youtu.be/FsBC6nK8CRY
+
 ![screenshot1](https://github.com/catronomix/catro-modulo/blob/master/CM066.PNG?raw=true)
+
 
 Full manual (old version, update will follow): <br> https://github.com/catronomix/catro-modulo/blob/master/CM-manual-v0.6.5.pdf
 
