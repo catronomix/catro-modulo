@@ -64,6 +64,8 @@ struct CM8Module : Module {
    float lastB;
    float currentA;
    float currentB;
+   float binA;
+   float binB;
    bool binarymode;
 	
 	CM8Module() {
@@ -75,7 +77,7 @@ struct CM8Module : Module {
 
 		srand(time(NULL));
 		cia = 1;
-		lo = hi = lastA = lastB = currentA = currentB = 0.0;
+		lo = hi = lastA = lastB = currentA = currentB = binA = binB = 0.0;
 		binarymode = false;
 	}
 	void process(const ProcessArgs &args) override;
@@ -136,8 +138,8 @@ void CM8Module::process(const ProcessArgs &args) {
 		currentB = lastB;
 	}
 
-	int binA = currentA;
-	int binB = currentB;
+	binA = currentA;
+	binB = currentB;
 	if (params[PARAM_BMODE].value == 1)
 	{
 		binA = (binA > 0) ? 10.0 : 0.0;
