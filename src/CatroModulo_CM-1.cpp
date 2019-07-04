@@ -139,7 +139,7 @@ struct CM1Module : Module {
 		NUM_OUTPUTS
 	};
 	enum LightIds {
-		NUM_LIGHTS = 0 //16
+		NUM_LIGHTS = 0
 	};
 
 	//generate 8 lfos
@@ -220,9 +220,7 @@ void CM1Module::process(const ProcessArgs &args) {
 			out = 0.0f;
 			outputs[OUTPUT_LFO + i].setVoltage(0);
 		}
-		//output lights
-		//lights[2*i + 0].setBrightnessSmooth(fmaxf(0.0f, out * 0.2f));
-		//lights[2*i + 1].setBrightnessSmooth(fmaxf(0.0f, -out * 0.2f));
+		
 	}
 	//mixed output
 	outputs[OUTPUT_MIX].setVoltage(mixOut * 0.125f);

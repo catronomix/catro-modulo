@@ -25,7 +25,7 @@ struct CM_Knob_small_def : SvgKnob {
 	CM_Knob_small_def() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_small_def.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_small_def.svg")));
         shadow->opacity = 0;
 
 	}
@@ -42,7 +42,7 @@ struct CM_Knob_small_red : SvgKnob {
 	CM_Knob_small_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_small_red.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_small_red.svg")));
         shadow->opacity = 0;
 
 	}
@@ -52,7 +52,7 @@ struct CM_Knob_big_def : SvgKnob {
 	CM_Knob_big_def() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_def.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_def.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -61,7 +61,7 @@ struct CM_Knob_big_attn : SvgKnob {
 	CM_Knob_big_attn() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_attn.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_attn.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -70,7 +70,7 @@ struct CM_Knob_big_offset : SvgKnob {
 	CM_Knob_big_offset() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_offset.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_offset.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -86,7 +86,7 @@ struct CM_Knob_big_red : SvgKnob {
 	CM_Knob_big_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_red.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_big_red.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -95,7 +95,7 @@ struct CM_Knob_huge_red : SvgKnob {
 	CM_Knob_huge_red() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_huge_red.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_huge_red.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -110,21 +110,21 @@ struct CM_Knob_bigeye : SvgKnob {
 	CM_Knob_bigeye() {
 		minAngle = -1.0*M_PI;
 		maxAngle = 1.0*M_PI;
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_bigeye.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-knob_bigeye.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Pot1_small : SvgScrew {
 	CM_Pot1_small() {
-		sw->setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-pot1_small.svg")));
+		sw->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-pot1_small.svg")));
 		box.size = sw->box.size;
 	}
 };
 
 struct CM_Pot1_big : SvgScrew {
 	CM_Pot1_big() {
-		sw->setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-pot1_big.svg")));
+		sw->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-pot1_big.svg")));
 		box.size = sw->box.size;
 
 	}
@@ -132,7 +132,7 @@ struct CM_Pot1_big : SvgScrew {
 
 struct CM_Input_def : SvgPort {
 	CM_Input_def() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_def.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_def.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -155,7 +155,7 @@ struct CM_I_def_tinybuttonR :SVGSwitch {
 
 struct CM_Input_small : SvgPort {
 	CM_Input_small() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_small.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_small.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -170,7 +170,7 @@ struct CM_I_small_tinybuttonL : SvgSwitch {
 
 struct CM_Input_bpm : SvgPort {
 	CM_Input_bpm() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_bpm.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_bpm.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -178,28 +178,28 @@ struct CM_Input_bpm : SvgPort {
 
 struct CM_Output_def : SvgPort {
 	CM_Output_def() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_def.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_def.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Output_def_dark : SvgPort {
 	CM_Output_def_dark() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_def)dark.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_def)dark.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Output_small : SvgPort {
 	CM_Output_small() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_small.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_small.svg")));
         shadow->opacity = 0;
 	}
 };
 
 struct CM_Output_bpm : SvgPort {
 	CM_Output_bpm() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_bpm.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-output_bpm.svg")));
         shadow->opacity = 0;
 	}
 };
@@ -240,7 +240,8 @@ struct CM_Slider_big_red : SvgSlider {
 		horizontal = true;
 		minHandlePos = Vec(-4, 0);
 		maxHandlePos = Vec(58, 0);
-		setSVGs(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-slider_big_red_bg.svg")), APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-slider_big_red.svg")));
+		setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-slider_big_red_bg.svg")));
+		setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-slider_big_red.svg")));
 	}
 	//void onDragMove(const event::DragMove &e) override;
 
@@ -385,7 +386,7 @@ struct CM_SelSeq {
 			dostep = false;
 		}else if (astep == -1){
 			recsel = patterns[pat][0];
-			dostep == true;
+			dostep = true;
 		}
 		return recsel;
 	}
@@ -793,7 +794,7 @@ struct CM9_LedIndicator : SvgWidget {
 	float *posy = nullptr;
 
 	CM9_LedIndicator() {
-		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM9_ledinc.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM9_ledinc.svg")));
 		wrap();
 	};
 

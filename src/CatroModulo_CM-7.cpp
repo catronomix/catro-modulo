@@ -103,8 +103,8 @@ void CM7Module::process(const ProcessArgs &args) {
 
 	//set clock lights
 	for (int i = 0; i < 7; i++){
-		lights[2 * i + 0].setBrightnessSmooth(fmaxf(0.0f, outputs[OUTPUT_CLKX1 + i].value * 0.2f));
-		lights[2 * i + 1].setBrightnessSmooth(fmaxf(0.0f, -outputs[OUTPUT_CLKX1 + i].value * 0.2f));
+		lights[2 * i + 0].setSmoothBrightness(fmaxf(0.0f, outputs[OUTPUT_CLKX1 + i].value * 0.2f), 0.0001);
+		lights[2 * i + 1].setSmoothBrightness(fmaxf(0.0f, -outputs[OUTPUT_CLKX1 + i].value * 0.2f), 0.0001);
 	}
 
 }
