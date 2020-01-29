@@ -5,12 +5,16 @@
 //helper functions
 
 //math and logic
-float cm_clamp(float val, float lo = -10.0, float hi = 10.0){
+float cm_clamp(float val, float lo = -10.0, float hi = 10.0, bool normalize = false){
 	if (lo > hi) return 0;
-    return std::min(std::max(val, lo), hi);
+    val = std::min(std::max(val, lo), hi);
+    if (normalize){
+        val = 10.0f * ((val - lo) / (hi - lo)) - 5.0f;
+    }
+    return val ;
 }
 
-float cm_fold(float val, float lo = -10.0, float hi = 10.0){
+float cm_fold(float val, float lo = -10.0, float hi = 10.0, bool normalize = false){
 
     if (lo == hi){
         return lo;
@@ -24,7 +28,10 @@ float cm_fold(float val, float lo = -10.0, float hi = 10.0){
                 val = hi + (hi - val);
             }
         }
-        val = std::max(lo, std::min(val, hi));
+        val = std::min(std::max(val, lo), hi);
+        if (normalize){
+        val = 10.0f * ((val - lo) / (hi - lo)) - 5.0f;
+    }
         return val;
     }
     return 0.0;
@@ -52,4 +59,3 @@ float cm_gauss(float size){
 float cm_gauss(float size, float offset){
     return cm_gauss(size) + offset;
 }
-

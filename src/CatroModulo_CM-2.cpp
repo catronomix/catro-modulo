@@ -27,23 +27,23 @@ struct CM2Module : Module {
 
 	CM2Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(CM2Module::PARAMS_ATN + 0, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_ATN + 1, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_ATN + 2, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_ATN + 3, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_ATN + 4, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_ATN + 5, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_ATN + 6, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_ATN + 7, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 0, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 1, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 2, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 3, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 4, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 5, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 6, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_OFF + 7, -5.0f, 5.0f, 0.0f, "");
-		configParam(CM2Module::PARAMS_X2, 1.0f, 2.0f, 1.0f, "");
+		configParam(CM2Module::PARAMS_ATN + 0, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_ATN + 1, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_ATN + 2, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_ATN + 3, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_ATN + 4, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_ATN + 5, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_ATN + 6, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_ATN + 7, -1.0f, 1.0f, 0.0f, "attenuate", "%", 0.0f, 100.0f);
+		configParam(CM2Module::PARAMS_OFF + 0, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_OFF + 1, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_OFF + 2, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_OFF + 3, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_OFF + 4, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_OFF + 5, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_OFF + 6, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_OFF + 7, -5.0f, 5.0f, 0.0f, "offset", "V");
+		configParam(CM2Module::PARAMS_X2, 1.0f, 2.0f, 1.0f, "output multiplier");
 
 		}
 	void process(const ProcessArgs &args) override;

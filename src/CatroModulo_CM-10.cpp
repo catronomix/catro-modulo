@@ -39,11 +39,10 @@ struct CM10Module : Module {
     	
 	CM10Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(CM10Module::PARAM_REC, 0.0, 1.0, 0.0f, "");
-        configParam(CM10Module::PARAM_PLAY, 0.0, 1.0, 0.0f, "");
-        configParam(CM10Module::PARAM_REC + 1, 0.0, 1.0, 0.0f, "");
-        configParam(CM10Module::PARAM_PLAY + 1, 0.0, 1.0, 0.0f, "");
-
+        configParam(CM10Module::PARAM_REC, 0.0, 1.0, 0.0f, "capture");
+        configParam(CM10Module::PARAM_PLAY, 0.0, 1.0, 0.0f, "override");
+        configParam(CM10Module::PARAM_REC + 1, 0.0, 1.0, 0.0f, "capture");
+        configParam(CM10Module::PARAM_PLAY + 1, 0.0, 1.0, 0.0f, "override");
 	}
 
 	void process(const ProcessArgs &args) override;

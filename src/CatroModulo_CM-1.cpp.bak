@@ -11,12 +11,11 @@ struct LowFrequencyOscillator {
 	float pw = 0.5f;
 	float freq = 1.0f;
 	bool invert = false;
-	bool paused = false;
 	dsp::SchmittTrigger resetTrigger;
 
 	LowFrequencyOscillator() {}
 	void setPitch(float pitch) {
-			//pitch = fminf(pitch, 13.0f);
+			pitch = fminf(pitch, 13.0f);
 			freq = powf(2.0f, pitch);
 	}
 
@@ -43,9 +42,6 @@ struct LowFrequencyOscillator {
 			default : freq = 0; break;
 		}
 	}
-	void setPitchU(float multi, float base) {
-		freq = powf(multi, 3.0f) * (base / 240);
-	}
 
 	void setPulseWidth(float pw_) {
 		const float pwMin = 0.01f;
@@ -62,14 +58,9 @@ struct LowFrequencyOscillator {
 			phase = 0.0f;
 		}
 	}
-
-	void pause(bool p) {
-		paused = p;
-	}
-
 	void step(float dt) {
 		float deltaPhase = fminf(freq * dt, 0.5f);
-		phase += paused ? 0.0f : deltaPhase;
+		phase += deltaPhase;
 		if (phase >= 1.0f)
 			phase -= 1.0f;
 
@@ -103,18 +94,15 @@ struct LowFrequencyOscillator {
 	//mixing the types
 	float tmix() {
 		float tmr = 0.0f;
-		if (typemix == 0.0f){
-			tmr = sin();
-		}else if (typemix < 1.0f){
+		if (typemix < 1.0f){
 			tmr = (1.0f - typemix) * sin() + typemix * tri();
-		}else if (typemix < 2.0f){
+		}else 
+		if (typemix < 2.0f){
 			typemix -= 1.0f;
 			tmr = (1.0f - typemix) * tri() + typemix * saw();
-		}else if (typemix < 3.0f){
+		}else {
 			typemix -= 2.0f;
 			tmr = (1.0f - typemix) * saw() + typemix * sqr();
-		}else{
-			tmr = sqr();
 		}
 		return tmr;
 	}
@@ -134,8 +122,6 @@ struct CM1Module : Module {
 		ENUMS(PARAM_PHASE, 8),
 		PARAM_RESET,
 		PARAM_OFFSET,
-		PARAM_LOCK,
-		PARAM_PAUSE,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -145,11 +131,11 @@ struct CM1Module : Module {
 		ENUMS(INPUT_PHASE, 8),
 		INPUT_RESET,
 		INPUT_BPM,
-		INPUT_PAUSE,
 		NUM_INPUTS
 	};
 	enum OutputIds {
 		ENUMS(OUTPUT_LFO, 8),
+		OUTPUT_MIX,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -167,15 +153,13 @@ struct CM1Module : Module {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		int i = -1;
 		while(++i < 8){
-			configParam(CM1Module::PARAM_TYPE + i , 0.0f, 3.0f, 0.0f, "shape", "", 0.0f, 1.0f, 1.0f);
-			configParam(CM1Module::PARAM_RATE + i , 0.0f, 1.0f, 0.5f, "rate", "", 0.0f, 16.0f, -8.0f);
-			configParam(CM1Module::PARAM_PW + i ,0.001f, 1.0f, 0.5f, "pulse width", "%", 0.0f, 100.0f);
-			configParam(CM1Module::PARAM_PHASE + i , 0.0f , 1.0f, 0.5f, "phase", "°", 0.0f, 360.0f, -180.0f);
+			configParam(CM1Module::PARAM_TYPE + i , 0.0f, 3.0f, 0.0f, "");
+			configParam(CM1Module::PARAM_RATE + i , 0.0f, 1.0f, 0.5f, "");
+			configParam(CM1Module::PARAM_PW + i ,0.001f, 1.0f, 0.5f, "");
+			configParam(CM1Module::PARAM_PHASE + i , 0.0f , 1.0f, 0.5f, "");
 		}
-		configParam(CM1Module::PARAM_RESET, 0.0f, 1.0f, 0.0f, "reset");
-		configParam(CM1Module::PARAM_OFFSET, 0.0f, 1.0f, 0.0f, "offset", "V", 0.0f, 5.0f);
-		configParam(CM1Module::PARAM_LOCK, 0.0f, 1.0f, 0.0f, "lock", "", 0.0f, -1.0f, 1.0f);
-		configParam(CM1Module::PARAM_PAUSE, 0.0f, 1.0f, 0.0f, "pause");
+		configParam(CM1Module::PARAM_RESET, 0.0f, 1.0f, 0.0f, "");
+		configParam(CM1Module::PARAM_OFFSET, 0.0f, 1.0f, 0.0f, "");
 
 	}
 	void process(const ProcessArgs &args) override;
@@ -189,9 +173,9 @@ struct CM1Module : Module {
 //Tarzan - this is for TJ :)
 
 void CM1Module::process(const ProcessArgs &args) {
+	float mixOut = 0.0f;
 	float offset = 5.0f * params[PARAM_OFFSET].getValue();
 	float reset = (inputs[INPUT_RESET].getVoltage() || params[PARAM_RESET].getValue());
-	bool paused = (inputs[INPUT_PAUSE].getVoltage() || params[PARAM_PAUSE].getValue());
 
 	if (inputs[INPUT_BPM].isConnected()){
 		lfoclock.setcv(inputs[INPUT_BPM].getVoltage());
@@ -207,27 +191,18 @@ void CM1Module::process(const ProcessArgs &args) {
 			float mod_one = clamp((inputs[INPUT_TYPE + i].isConnected()) ? params[PARAM_TYPE + i].getValue() * inputs[INPUT_TYPE + i].getVoltage() * 0.1f : params[PARAM_TYPE + i].getValue(), 0.0f, 3.0f); //TYPE
 			float mod_two;
 			if (synced == true){
-				if (params[PARAM_LOCK].getValue() == 0){
-					mod_two = roundf(clamp((inputs[INPUT_RATE + i].isConnected()) ? (params[PARAM_RATE + i].getValue() * 16.0f - 8.0f) + (inputs[INPUT_RATE + i].getVoltage() * 0.8f) : params[PARAM_RATE + i].getValue() * 16.0f - 8.0f , -8.0f, 8.0f)); //RATE;
-				}else{
-					mod_two = clamp((inputs[INPUT_RATE + i].isConnected()) ? (params[PARAM_RATE + i].getValue() * 2.0f) + (inputs[INPUT_RATE + i].getVoltage() * 0.2f) : params[PARAM_RATE + i].getValue() * 2.0f , 0.0f, 4.0f); //RATE
-				}
+				mod_two = roundf(clamp((inputs[INPUT_RATE + i].isConnected()) ? (params[PARAM_RATE + i].getValue() * 16.0 - 8.0) + (clamp(inputs[INPUT_RATE + i].getVoltage() * 0.1, -1.0f, 1.0f) * 8) : params[PARAM_RATE + i].getValue() * 16.0 - 8.0 , -8.0f, 8.0f)); //RATE
 			}else{
-				mod_two = clamp((inputs[INPUT_RATE + i].isConnected()) ? (params[PARAM_RATE + i].getValue() * 21.0 - 8.0) + (inputs[INPUT_RATE + i].getVoltage() * 2.1) : params[PARAM_RATE + i].getValue() * 21.0 - 8.0 , -8.0f, 13.0f); //RATE
+				mod_two = clamp((inputs[INPUT_RATE + i].isConnected()) ? (params[PARAM_RATE + i].getValue() * 21.0 - 8.0) + (clamp(inputs[INPUT_RATE + i].getVoltage() * 0.1, -1.0f, 1.0f) * 21) : params[PARAM_RATE + i].getValue() * 21.0 - 8.0 , -8.0f, 13.0f); //RATE
 			}
 			float mod_thr = clamp((inputs[INPUT_PW + i].isConnected()) ? params[PARAM_PW + i].getValue() * (1.0 + inputs[INPUT_PW + i].getVoltage()) * 0.05f : params[PARAM_PW + i].getValue(), 0.0f, 1.0f); //PW
 			float mod_fou = clamp((inputs[INPUT_PHASE + i].isConnected()) ? params[PARAM_PHASE + i].getValue() + inputs[INPUT_PHASE + i].getVoltage() * 0.1f : params[PARAM_PHASE + i].getValue(), 0.0f, 1.0f); //PHASE
 			
 
 			//set lfo mods
-			lfo[i].pause(paused);
 			lfo[i].setMix(mod_one);
 			if (synced == true){
-				if (params[PARAM_LOCK].getValue()){
-					lfo[i].setPitchU(mod_two, lfoclock.getbpm());
-				}else{
-					lfo[i].setPitch(mod_two, lfoclock.getbpm());
-				}
+				lfo[i].setPitch(mod_two, lfoclock.getbpm());
 			}else{
 				lfo[i].setPitch(mod_two);
 			}
@@ -240,12 +215,15 @@ void CM1Module::process(const ProcessArgs &args) {
 
 			out = 5.0f * lfo[i].tmix() + offset;
 			outputs[OUTPUT_LFO + i].setVoltage(clamp(out, -10.0f, 10.0f) );
+			mixOut += out;
 		}else{
 			out = 0.0f;
 			outputs[OUTPUT_LFO + i].setVoltage(0);
 		}
 		
 	}
+	//mixed output
+	outputs[OUTPUT_MIX].setVoltage(mixOut * 0.125f);
 }
 
 
@@ -289,10 +267,6 @@ struct CM1ModuleWidget : ModuleWidget {
 		//RESET
 		addParam(createParam<CM_I_def_tinybuttonL>(Vec(8.5, 339.2), module, CM1Module::PARAM_RESET));
 		addInput(createInput<CM_Input_def>(Vec(17.4, 339.2), module, CM1Module::INPUT_RESET));
-
-		//RESET
-		addParam(createParam<CM_I_def_tinybuttonL>(Vec(214.3, 329.3), module, CM1Module::PARAM_PAUSE));
-		addInput(createInput<CM_Input_def>(Vec(223.1, 329.3), module, CM1Module::INPUT_PAUSE));
 		
 		//OFFSET (+5V)
 		addParam(createParam<CM_Switch_small>(Vec(48.3, 338.7), module, CM1Module::PARAM_OFFSET));
@@ -300,8 +274,9 @@ struct CM1ModuleWidget : ModuleWidget {
 		//sync (bpm)
 		addInput(createInput<CM_Input_bpm>(Vec(70.1, 339.2), module, CM1Module::INPUT_BPM));
 
-		//synclock
-		addParam(createParam<CM_Switch_smallh>(Vec(100.5, 343.2), module, CM1Module::PARAM_LOCK));
+		//
+		//MIXOUT
+		addOutput(createOutput<CM_Output_small>(Vec(188.0, 342.5), module, 8));
 
 
 	}

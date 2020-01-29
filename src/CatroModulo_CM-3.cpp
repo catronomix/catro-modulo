@@ -64,20 +64,20 @@ struct CM3Module : Module {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		int y = 0;
 		for(int i = 0; i < 16; i += 2){
-			configParam(CM3Module::PARAM_REC + y, 0.0f, 1.0f, 0.0f, "");
-			configParam(CM3Module::PARAM_EYE + y, -1.0f, 1.0f, 0.0f, "");
+			configParam(CM3Module::PARAM_REC + y, 0.0f, 1.0f, 0.0f, "record values in slot " + std::to_string(y + 1));
+			configParam(CM3Module::PARAM_EYE + y, -1.0f, 1.0f, 0.0f, "value " + std::to_string(y + 1), "", 0.0f, 100.0f);
 			y++;
 		}
 		
-		configParam(CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f, "");
-		configParam(CM3Module::PARAM_MORPH, -1.0f, 1.0f, 0.0f, "");
-		configParam(CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f, "");
-		configParam(CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f, "");
-		configParam(CM3Module::PARAM_SCAN, 0.0f, 1.0f, 0.0f, "");
-		configParam(CM3Module::PARAM_SELECT, 0.0f, 7.99999f, 0.0f, "");
-		configParam(CM3Module::PARAM_SEQ, 0.0f, 1.0f, 1.0f, "");
-		configParam(CM3Module::PARAM_RESET, 0.0f, 1.0f, 0.0f, "");
-		configParam(CM3Module::PARAM_STEP, 0.0f, 1.0f, 0.0f, "");
+		configParam(CM3Module::PARAM_PATTERN, 0.0f, 15.0f, 0.0f, "pattern select", "", 0.0f, 1.0f, 1.0f);
+		configParam(CM3Module::PARAM_MORPH, -1.0f, 1.0f, 0.0f, "(multiplied < source > recording)");
+		configParam(CM3Module::PARAM_LENGTH, 0.0f, 15.0f, 7.0f, "pattern lenght", "", 0.0f, 1.0f, 1.0f);
+		configParam(CM3Module::PARAM_TRYME, 0.0f, 1.0f, 0.0f, "randomize (!)");
+		configParam(CM3Module::PARAM_SCAN, 0.0f, 1.0f, 0.0f, "enable scan/blend");
+		configParam(CM3Module::PARAM_SELECT, 0.0f, 7.99999f, 0.0f, "select recording for output");
+		configParam(CM3Module::PARAM_SEQ, 0.0f, 1.0f, 1.0f, "enable sequencer", "", 0.0f, -1.0f, 1.0f);
+		configParam(CM3Module::PARAM_RESET, 0.0f, 1.0f, 0.0f, "reset");
+		configParam(CM3Module::PARAM_STEP, 0.0f, 1.0f, 0.0f, "step");
 
 		recball_x = recball_xarray[0];
 		recball_y = recball_yarray[0];
@@ -300,9 +300,9 @@ struct CM3ModuleWidget : ModuleWidget {
 		}
 
 		//OTHER ELEMENTS
-		addParam(createParam<CM_Knob_small_def_half>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN));
+		addParam(createParam<CM_Knob_small_def_half_16>(Vec(33.4 , 34.7), module, CM3Module::PARAM_PATTERN));
 		addParam(createParam<CM_Slider_big_red>(Vec(156.5 , 17.9), module, CM3Module::PARAM_MORPH));
-		addParam(createParam<CM_Knob_small_def_half>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH));
+		addParam(createParam<CM_Knob_small_def_half_16>(Vec(326.0 , 34.7), module, CM3Module::PARAM_LENGTH));
 		addParam(createParam<CM_TryMe_button>(Vec(15.0 , 320.1), module, CM3Module::PARAM_TRYME));
 		addParam(createParam<CM_Switch_small>(Vec(137.8 , 309.0), module, CM3Module::PARAM_SCAN));
 		addParam(createParam<CM_Knob_huge_red_os>(Vec(161.3 , 286.0), module, CM3Module::PARAM_SELECT));

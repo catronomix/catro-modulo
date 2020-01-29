@@ -47,7 +47,7 @@ struct CM7Module : Module {
 	
 	CM7Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(CM7Module::PARAM_RST, 0.0f, 1.0f, 0.0f, "");
+		configParam(CM7Module::PARAM_RST, 0.0f, 1.0f, 0.0f, "reset");
 			//initialize objects
 	}
 	void process(const ProcessArgs &args) override;

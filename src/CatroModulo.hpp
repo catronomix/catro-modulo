@@ -38,6 +38,12 @@ struct CM_Knob_small_def_half : CM_Knob_small_def {
 	}
 };
 
+struct CM_Knob_small_def_half_16 : CM_Knob_small_def_half {
+	CM_Knob_small_def_half_16() {
+		snap = true;
+	}
+};
+
 struct CM_Knob_small_red : SvgKnob {
 	CM_Knob_small_red() {
 		minAngle = -1.0*M_PI;
@@ -79,6 +85,14 @@ struct CM_Knob_big_def_tt : CM_Knob_big_def {
 	CM_Knob_big_def_tt() {
 		minAngle = -0.75*M_PI;
 		maxAngle = 0.75*M_PI;
+	}
+};
+
+struct CM_Knob_big_def_tts : CM_Knob_big_def {
+	CM_Knob_big_def_tts() {
+		minAngle = -0.75*M_PI;
+		maxAngle = 0.75*M_PI;
+		snap = true;
 	}
 };
 
@@ -175,6 +189,13 @@ struct CM_Input_bpm : SvgPort {
 	}
 };
 
+struct CM_Input_ext : SvgPort {
+	CM_Input_ext() {
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-input_ext.svg")));
+        shadow->opacity = 0;
+	}
+};
+
 
 struct CM_Output_def : SvgPort {
 	CM_Output_def() {
@@ -208,6 +229,13 @@ struct CM_Switch_small : SvgSwitch {
 	CM_Switch_small() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_small_0.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_small_1.svg")));
+	}
+};
+
+struct CM_Switch_smallh : SvgSwitch {
+	CM_Switch_smallh() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_smallh_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-TS_smallh_1.svg")));
 	}
 };
 
@@ -259,6 +287,13 @@ struct CM_Ledbutton_mini : SvgSwitch {
 	CM_Ledbutton_mini() {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-ledbutton_mini_0.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM-ledbutton_mini_1.svg")));
+	}
+};
+
+struct CM_8_normalizebutton : SvgSwitch {
+	CM_8_normalizebutton() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM8_normoff.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/CM8_normon.svg")));
 	}
 };
 
@@ -519,6 +554,18 @@ struct CM_BpmClock {
 	float clk_out[3] = {};
 	int resetframes = 0;
 
+
+	//ext input detector
+	dsp::SchmittTrigger externalClockTrigger;
+	float extTime = 0.0f;
+	float extLasttime[2] = {};
+	// float extRate = 0.0f;
+	// int extCount = 0;
+	// float exthistory[4] = {};
+	 int rateLock = 0;
+	float extRateLocked = 0.0f;
+	// float ret = 0.0f;
+
 	public:
 
 	CM_BpmClock(){
@@ -531,8 +578,7 @@ struct CM_BpmClock {
 
 	//between 0 and 1000
 	void setbpm(float bpm){
-		bpm = std::max(bpm, 0.0f);
-		clk_bpm = bpm;
+		clk_bpm = std::max(bpm, 0.0f);
 		bpm_cv = bpmtocv(bpm);
 		// freq = clk_bpm / 30.0; //double freq! -for halfstep
 	}
@@ -555,7 +601,7 @@ struct CM_BpmClock {
 
 	void step(float dt){
 		pulsegen();
-		freq = clk_bpm / 30.0; //double freq! -for halfstep
+		freq = clk_bpm / 15.0f; //double freq! -for halfstep
 		float deltaPhase = fminf(freq * dt, 0.5f); //delta is halftime
 		phase += deltaPhase;
 		if (phase >= 1.0f){phase -= 1.0f;}
@@ -583,20 +629,66 @@ struct CM_BpmClock {
 			return 0.0;
 		}else{
 			resetframes = 0;
-			return 1.0;
+			return clk_out[out];
 		}
 		
 	}
 
 	float bpmtocv(float bpm){
-		return bpm * 0.01;
+		return bpm / 60.0f;
 	}
 
 	float cvtobpm(float cv){
-		return cv * 100.0;
+		return cv * 60.0f;
+	}
+
+	float exttrack(float ext, float interval){
+		if (externalClockTrigger.process(ext)){
+			extLasttime[1] = extLasttime[0];
+			extLasttime[0] = extTime;
+			if (extLasttime[0] > 0 && abs(extLasttime[0] - extLasttime[1]) < 0.001){
+				extRateLocked = (6.0f / ((extLasttime[0] + extLasttime[1] + interval) * 5.0f));
+				if (rateLock == 0){
+					setReset(1.0f);
+					rateLock = 1;
+				}
+			}else{
+				rateLock = 0;
+			}
+			extTime = 0.0f;
+		}
+		extTime += interval;
+		
+		return (extRateLocked > 0) ? extRateLocked : 0.0f;
+	}
+
+	void extreset(bool go){
+		if (go){
+		externalClockTrigger.reset();
+		extreset();
+		}
+	}
+
+	void extreset(){
+		extTime = 0.0f;
+		extLasttime[0] = 0.0f;
+		extLasttime[1] = 0.0f;
+		extRateLocked = 0.0f;
+		// extCount = 0;
+		 rateLock = 0;
+		// extRateLocked = 0.0f;
 	}
 
 	private:
+
+	bool compar(int num, float valone, const float valar[]){
+		for (int i=0; i < num; i++){
+					if (valar[i] != valone){
+						return false;
+					}
+				}
+				return true;
+	}
 
 	float sqr(){
 		float sqr = phase < pw ? 1.0f : -1.0f;
@@ -810,6 +902,35 @@ struct CM9_LedIndicator : SvgWidget {
 	}
 };
 
+//Operator mode switch
+struct CM_OP : Button {
+
+	int *opmode = nullptr;
+	const float opcoords[8] = {10.2, 15.4, 10.2, 5.1, 5.4, 10.5, 15.6, 10.5};
+
+	CM_OP(float x, float y) {
+		box.pos.x = x;
+		box.pos.y = y;
+	};
+
+	void draw(const DrawArgs &args) override {
+		// Background
+		NVGcolor backgroundColor = nvgRGB(0xff, 0xf4, 0x00);
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, opcoords[*opmode], opcoords[*opmode + 4], 2.5f);
+		nvgFillColor(args.vg, backgroundColor);
+		nvgFill(args.vg);		
+	}
+
+	void onDragStart(const event::DragStart& e) override {
+		*opmode = (*opmode < 3) ? (*opmode + 1) : 0;
+	}
+	
+	int getopmode(){
+		return *opmode;
+	}
+};
+
 //yellow big led indicator
 struct BigLedIndicator : TransparentWidget {
 
@@ -832,7 +953,7 @@ struct BigLedIndicator : TransparentWidget {
 			nvgBeginPath(args.vg);
 			nvgRoundedRect(args.vg, 4.0, 4.0, box.size.x - 8.0, box.size.y - 8.0, 4.0);
 			nvgFillColor(args.vg, nvgRGB(0xff, 0xf4, 0x00));
-			nvgFill(args.vg);;
+			nvgFill(args.vg);
 		}
 	}
 };

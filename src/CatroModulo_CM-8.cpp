@@ -10,6 +10,7 @@ struct CM8Module : Module {
 		PARAM__b,
         PARAM_CIA,
 		PARAM_BMODE,
+		PARAM_NORMALIZE,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -70,10 +71,11 @@ struct CM8Module : Module {
 	
 	CM8Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(CM8Module::PARAM__a, -10.0, 10.0, 0.0f, "Lower treshold");
-		configParam(CM8Module::PARAM__b, -10.0, 10.0, 0.0f, "Upper treshold");
-		configParam(CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f, "Centered - Inversing - Additive");
-		configParam(CM8Module::PARAM_BMODE, 0.0f, 1.0f, 0.0f, "Binary mode");
+		configParam(CM8Module::PARAM__a, -10.0, 10.0, 0.0f, "lower treshold", "V");
+		configParam(CM8Module::PARAM__b, -10.0, 10.0, 0.0f, "upper treshold", "V");
+		configParam(CM8Module::PARAM_CIA, 0.0f, 2.0f, 0.0f, "centered < inversing > additive");
+		configParam(CM8Module::PARAM_BMODE, 0.0f, 1.0f, 0.0f, "binary mode");
+		configParam(CM8Module::PARAM_NORMALIZE, 0.0f, 1.0f, 0.0f, "normalize waveshapers");
 
 		srand(time(NULL));
 		cia = 1;
@@ -149,8 +151,8 @@ void CM8Module::process(const ProcessArgs &args) {
 	//A
 	outputs[OUTPUT_ALTB].setVoltage((binA > binB) * 10.0);
 	outputs[OUTPUT_AISB].setVoltage((binA == binB) * 10.0);
-	outputs[OUTPUT_ACLM].setVoltage(cm_clamp(binA, lo, hi));
-	outputs[OUTPUT_AFLD].setVoltage(cm_fold(binA, lo, hi));
+	outputs[OUTPUT_ACLM].setVoltage(cm_clamp(binA, lo, hi, params[PARAM_NORMALIZE].getValue()));
+	outputs[OUTPUT_AFLD].setVoltage(cm_fold(binA, lo, hi, params[PARAM_NORMALIZE].getValue()));
 	outputs[OUTPUT_ALO].setVoltage((currentA < lo) * 10.0);
 	outputs[OUTPUT_AHI].setVoltage((currentA > hi) * 10.0);
 	outputs[OUTPUT_ARNG].setVoltage((currentA >= lo && currentA <= hi) * 10.0);
@@ -158,8 +160,8 @@ void CM8Module::process(const ProcessArgs &args) {
 	//B
 	outputs[OUTPUT_BLTA].setVoltage((binA < binB) * 10.0);
 	outputs[OUTPUT_ANTB].setVoltage(!(binA == binB) * 10.0);
-	outputs[OUTPUT_BCLM].setVoltage(cm_clamp(binB, lo, hi));
-	outputs[OUTPUT_BFLD].setVoltage(cm_fold(binB, lo, hi));
+	outputs[OUTPUT_BCLM].setVoltage(cm_clamp(binB, lo, hi, params[PARAM_NORMALIZE].getValue()));
+	outputs[OUTPUT_BFLD].setVoltage(cm_fold(binB, lo, hi, params[PARAM_NORMALIZE].getValue()));
 	outputs[OUTPUT_BLO].setVoltage((currentB < lo) * 10.0);
 	outputs[OUTPUT_BHI].setVoltage((currentB > hi) * 10.0);
 	outputs[OUTPUT_BRNG].setVoltage((currentB >= lo && currentB <= hi) * 10.0);
@@ -191,6 +193,7 @@ struct CM8ModuleWidget : ModuleWidget {
 		addParam(createParam<CM_Switch_small_3>(Vec(16.4, 103.3), module, CM8Module::PARAM_CIA));
 		addParam(createParam<CM_Ledbutton_mini>(Vec(5.0, 117.2), module, CM8Module::PARAM_BMODE));
 		addInput(createInput<CM_Input_small>(Vec(54.0 , 112.7), module, CM8Module::INPUT_SNH));
+		addParam(createParam<CM_8_normalizebutton>(Vec(25.0 , 241.3), module, CM8Module::PARAM_NORMALIZE));
 
 		float a = 5.4;
 		float b = 46.0;

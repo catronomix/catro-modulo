@@ -33,13 +33,13 @@ struct CM4Module : Module {
 	};
 
 	float bpm_display = 0.0;
+	bool extconnect = false;
     //create objects
     CM_BpmClock bpmclock;
-	bool isreset = false;
 	
 	CM4Module() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(CM4Module::PARAM_BPM, 0.0f, 5.0, 0.0f, "tempo", " BPM", 0.0f, 100.0f);
+		configParam(CM4Module::PARAM_BPM, 0.0f, 6.0, 0.0f, "BPM", "", 0.0f, 50.0f);
 		configParam(CM4Module::PARAM_SNAP, 0.0f, 2.0f, 1.0f, "snap");
 		configParam(CM4Module::PARAM_RST, 0.0f, 1.0f, 0.0f, "reset");
 
@@ -50,31 +50,31 @@ struct CM4Module : Module {
 
 void CM4Module::process(const ProcessArgs &args) {
 	if (params[PARAM_SNAP].getValue() == 0){
-		bpmclock.setbpm(int( (params[PARAM_BPM].getValue() * 100.0) * 100) / 100.0f );
+		bpmclock.setbpm(bpmclock.cvtobpm(int((params[PARAM_BPM].getValue() * 100.0) * 100) / 100.0f));
 	}else if (params[PARAM_SNAP].getValue() == 1){
 		bpmclock.setbpm(int(params[PARAM_BPM].getValue() * 100.0));
 	}else if (params[PARAM_SNAP].getValue() == 2){
 		bpmclock.setbpm(int( (params[PARAM_BPM].getValue() * 100.0) * 0.2) * 5.0f );
 	}
-	
+
 	outputs[OUTPUT_RST].setVoltage((inputs[INPUT_RST].getVoltage() || params[PARAM_RST].getValue()) * 10.0);
-	bpmclock.setReset(outputs[OUTPUT_RST].getVoltage());
+	bpmclock.setReset(outputs[OUTPUT_RST].value);
 	
 	//external clock
 	if (inputs[INPUT_EXT].isConnected()){
 		float extcv = bpmclock.exttrack(inputs[INPUT_EXT].getVoltage(), args.sampleTime);
-		//extcv = (extcv > 0) ? (1.0f / extcv) * (60000.0f / args.sampleRate ) : 0.0f;//* 1.211387038158690f : 0.0f;
+		extcv = (extcv > 0.35) ? (1.0f / extcv) * 1.211387038158690f : 0.0f;
 		if (params[PARAM_SNAP].getValue() == 0){
-		bpmclock.addcv(bpmclock.bpmtocv(0.01) * roundf(extcv * 10000.0f));
+		bpmclock.addcv(extcv);
 		}else if (params[PARAM_SNAP].getValue() == 1){
-		bpmclock.addcv(bpmclock.bpmtocv(1) * roundf(extcv * 100.0f));
+		bpmclock.addcv(bpmclock.bpmtocv(2) * roundf(extcv * 50.0f));
 		}else if (params[PARAM_SNAP].getValue() == 2){
-		bpmclock.addcv(bpmclock.bpmtocv(5) * roundf(extcv * 20.0f));
+		bpmclock.addcv(bpmclock.bpmtocv(10) * roundf(extcv * 10.0f));
+		extconnect = true;
 		}
-		isreset = false;
-	}else if (isreset == false){
+	}else if (extconnect == true){
 		bpmclock.extreset(true);
-		isreset = true;
+		extconnect = false;
 	}
 	outputs[OUTPUT_BPM1].setVoltage(bpmclock.getcv());
 
@@ -83,7 +83,8 @@ void CM4Module::process(const ProcessArgs &args) {
 
 	outputs[OUTPUT_D2].setVoltage(bpmclock.getcv() * 0.5);
 	outputs[OUTPUT_X2].setVoltage(bpmclock.getcv() * 2.0);
-	bpm_display = bpmclock.getbpm();
+	// bpm_display = bpmclock.getbpm() / 2.0f;
+	bpm_display = bpmclock.debug(); //temp debugging output
 
 	bpmclock.step(args.sampleTime);
 
