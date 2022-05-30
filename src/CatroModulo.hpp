@@ -642,7 +642,7 @@ struct CM_BpmClock {
 	}
 
 	float cvtobpm(float cv){
-		return 2.0f * (float)pow(2, cv) * 0.0166;
+		return 2.0f * (float)pow(2, cv) / 0.0166;
 		//return cv * 60.0f;
 	}
 
