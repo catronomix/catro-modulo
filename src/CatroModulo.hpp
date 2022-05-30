@@ -634,12 +634,16 @@ struct CM_BpmClock {
 		
 	}
 
+	//TODO: make this compatible with CLKD (https://vcvrack.com/manual/VoltageStandards#pitch-and-frequencies)
+	
 	float bpmtocv(float bpm){
-		return bpm / 60.0f;
+		return ((float)log(bpm * 0.0166) / (float)log(2)) - 1.0f;
+		//return bpm / 60.0f;
 	}
 
 	float cvtobpm(float cv){
-		return cv * 60.0f;
+		return 2.0f * (float)pow(2, cv) * 0.0166;
+		//return cv * 60.0f;
 	}
 
 	float exttrack(float ext, float interval){
