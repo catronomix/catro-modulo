@@ -634,15 +634,16 @@ struct CM_BpmClock {
 		
 	}
 
-	//TODO: make this compatible with CLKD (https://vcvrack.com/manual/VoltageStandards#pitch-and-frequencies)
+	//TODO: make this compatible with 1V/oct
+	// Previously it used to give Hz and not 1V/oct
 	
 	float bpmtocv(float bpm){
-		return ((float)log(bpm * 0.0166) / (float)log(2)) - 1.0f;
+		return ((float)log(bpm / 60.0f) / (float)log(2)) - 1.0f;
 		//return bpm / 60.0f;
 	}
 
 	float cvtobpm(float cv){
-		return 2.0f * (float)pow(2, cv) / 0.0166;
+		return 120.0f * (float)pow(2, cv);
 		//return cv * 60.0f;
 	}
 
