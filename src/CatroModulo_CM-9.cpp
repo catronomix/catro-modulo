@@ -93,7 +93,7 @@ void CM9Module::process(const ProcessArgs &args) {
 	gatemode = (inputsconnected == 0 && inputs[INPUT_1].isConnected() == false);
 	
 	//process selector
-	float selectorparam = clamp(round((inputs[INPUT_SEL].isConnected()) ? inputs[INPUT_SEL].getVoltage() * 0.1 * params[PARAM_SEL].getValue() : params[PARAM_SEL].getValue()), 0, 7);
+	float selectorparam = clamp(roundf((inputs[INPUT_SEL].isConnected()) ? inputs[INPUT_SEL].getVoltage() * 0.1 * params[PARAM_SEL].getValue() : params[PARAM_SEL].getValue()), 0.0, 7.0);
 
 	//stepper
 	if (inputs[INPUT_CLK].isConnected()){
